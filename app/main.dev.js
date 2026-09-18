@@ -15,6 +15,11 @@ import { app, BrowserWindow, ipcMain, Menu, MenuItem } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 const remoteMain = require("@electron/remote/main");
+
+// FORK: o auto-updater do upstream aponta para as releases de fribbels/Fribbels-Epic-7-Optimizer.
+// Em um build empacotado deste fork ele substituiria o app pela versão original, apagando as
+// features do fork. Mantido desligado até existir um canal de releases próprio.
+const FORK_AUTO_UPDATE_ENABLED = false;
 // import MenuBuilder from './menu';
 
 const isMac = process.platform === 'darwin'
@@ -101,7 +106,7 @@ export default class AppUpdater {
     log.transports.file.level = 'info';
     autoUpdater.logger = log;
     autoUpdater.allowDowngrade = true;
-    autoUpdater.checkForUpdatesAndNotify();
+    if (FORK_AUTO_UPDATE_ENABLED) autoUpdater.checkForUpdatesAndNotify();
   }
 }
 
@@ -215,7 +220,7 @@ const createWindow = async () => {
   });
 
   mainWindow.once("ready-to-show", () => {
-    autoUpdater.checkForUpdatesAndNotify();
+    if (FORK_AUTO_UPDATE_ENABLED) autoUpdater.checkForUpdatesAndNotify();
   });
 
 
@@ -227,11 +232,13 @@ const createWindow = async () => {
 
   new AppUpdater();
 
-  require('update-electron-app')({
-    repo: 'fribbels/Fribbels-Epic-7-Optimizer',
-    updateInterval: '5 minutes',
-    // logger: require('electron-log')
-  })
+  if (FORK_AUTO_UPDATE_ENABLED) {
+    require('update-electron-app')({
+      repo: 'fribbels/Fribbels-Epic-7-Optimizer',
+      updateInterval: '5 minutes',
+      // logger: require('electron-log')
+    })
+  }
 };
 
 /**
@@ -265,6 +272,7 @@ ipcMain.on('app_version', (event) => {
 
 
 ipcMain.on('test', async (event) => {
+  if (!FORK_AUTO_UPDATE_ENABLED) return event.sender.send('test', JSON.stringify({ updateInfo: { version: app.getVersion() } }));
   const updates = await autoUpdater.checkForUpdates()
   console.log("TEST UPDATES")
   console.log(updates)
@@ -272,6 +280,7 @@ ipcMain.on('test', async (event) => {
 });
 
 ipcMain.on('check', async (event) => {
+  if (!FORK_AUTO_UPDATE_ENABLED) return event.sender.send('check', { updateInfo: { version: app.getVersion() } });
   const updates = await autoUpdater.checkForUpdatesAndNotify()
   console.log(updates)
   event.sender.send('check', updates);
