@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "statKeys": [
+    "atk",
+    "def",
+    "hp",
+    "spd",
+    "chc",
+    "chd",
+    "eff",
+    "efr"
+  ],
+  "statLabels": {
+    "atk": "ATK",
+    "def": "DEF",
+    "hp": "HP",
+    "spd": "SPD",
+    "chc": "CR",
+    "chd": "CD",
+    "eff": "EFF",
+    "efr": "RES"
+  },
+  "archetypes": []
+}

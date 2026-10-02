@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><!-- substatus modificado: duas setas em círculo, redesenhado do print do jogo -->
+  <g id="m" fill="#fff" stroke="#fff" stroke-linecap="round">
+    <path fill="none" stroke-width="2.6" d="M18.6 8.8 A7 7 0 0 0 5.4 10.2"/>
+    <path stroke="none" d="M2.3 9.6 L8.7 10.8 L5.1 15.3 Z"/>
+  </g>
+  <use href="#m" transform="rotate(180 12 12)"/>
+</svg>

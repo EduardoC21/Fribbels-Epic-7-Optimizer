@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://krivpfvxi0.execute-api.us-west-2.amazonaws.com http://localhost:8130; connect-src https://krivpfvxi0.execute-api.us-west-2.amazonaws.com http://localhost:8130 https://e7api.onstove.com; img-src 'self' data: https://static.smilegatemegaport.com https://epic7db.com; font-src 'self'; style-src 'self' 'unsafe-inline'" />
+  <title>Comunidade — Fribbels E7 (fork)</title>
+  <!-- ordem importa: tokens definem as variáveis que base e components consomem -->
+  <link rel="stylesheet" href="ui/tokens.css" />
+  <link rel="stylesheet" href="ui/base.css" />
+  <link rel="stylesheet" href="ui/components.css" />
+  <link rel="stylesheet" href="ui/features.css" />
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    // nodeIntegration está ligado nesta janela; o app React entra via require.
+    try {
+      require('./main.js');
+    } catch (e) {
+      document.getElementById('root').innerHTML =
+        '<pre style="color:var(--bad);padding:16px;white-space:pre-wrap;font:12px ui-monospace,monospace">'
+        + 'Erro ao carregar:\n' + (e && e.stack ? e.stack : e) + '</pre>';
+    }
+  </script>
+</body>
+</html>

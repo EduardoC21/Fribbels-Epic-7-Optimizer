@@ -1,0 +1,108 @@
+/*
+ * tokens.css — a paleta do projeto, cada cor com sua FUNÇÃO.
+ * Fonte da verdade da estética (artboard "0 · Estética & Componentes").
+ * Nenhum componente deve escrever hex direto: sempre var(--token).
+ */
+:root {
+  /* superfícies e texto */
+  --bg:        #1a1917;  /* fundo do app */
+  --surface:   #242220;  /* caixas / painéis */
+  --surface-2: #2d2a27;  /* campos, cabeçalhos de tabela, itens */
+  --surface-3: #1e1c1a;  /* barra lateral (levemente diferente do bg) */
+  --line:      #3a3632;  /* bordas e divisórias */
+  --line-soft: #2f2c29;  /* divisória fraca (linhas de tabela) */
+  --text:      #f1ede6;  /* texto principal */
+  --text-2:    #a8a199;  /* texto secundário */
+  --text-3:    #979088;  /* texto terciário: rótulo miúdo, placeholder, "—" (≥4,5:1 até sobre --surface-2) */
+  --muted:     #6e685f;  /* NÃO é cor de texto (2,6–3,2:1): borda de hover, barra de rolagem, desativado */
+  --ink:       #242220;  /* texto sobre fundo claro (botão accent) */
+
+  /* ação */
+  --accent:        #38bdf8;  /* ação principal, seleção, foco */
+  --accent-hover:  #7dd3fc;
+  --accent-weak:   #16323b;  /* fundo suave do accent (chip ativo, linha selecionada) */
+  --accent-border: #2a5566;
+
+  /* semântica */
+  --ok:   #4cc26a;  /* sobra · alvo batido · vitória */
+  --bad:  #ef6257;  /* falta · déficit */
+  /* destaque de MUDANÇA de número (components/Delta.js): a cor nasce aqui e volta à normal em --chg-ms */
+  --chg-up: var(--ok);
+  --chg-down: var(--bad);
+  --chg-ms: 2800;    /* duração total (ms) */
+  --chg-hold: 30;    /* % da duração com a cor cheia antes de começar a voltar */
+  --chg-mix: 100;    /* intensidade: % da cor de mudança no começo do fade */
+  --bad-border: #5a2f2b;  /* borda de ação destrutiva (Remover) */
+  --warn: #e6c24a;  /* atenção: alteração pendente, valor fora da faixa */
+  --gain: var(--q-25);                      /* quanto o substatus subiu com os ups, "(+6%)" — laranja como no jogo */
+  --enh-badge: var(--q-25);                 /* selo "+N" no ícone da peça (como no jogo) */
+  --up-flash: rgba(76, 194, 106, .32);      /* fundo da linha que acabou de subir (= --ok translúcido; some em --chg-ms) */
+
+  /* raridade do item (borda do card) */
+  --epic:   #ef5a4d;
+  --heroic: #b06bf0;
+  --rare:   #4d90ff;
+  --good:   #4cc26a;
+  --normal: #9c968c;
+
+  /* ups do substatus — DISCRETO, 1 chevron por up (1..5) */
+  --up-1: #8a857c;
+  --up-2: #4cc26a;
+  --up-3: #4d90ff;
+  --up-4: #b06bf0;
+  --up-5: #ef5a4d;
+
+  /* heatmap da lista — CONTÍNUO (vermelho→verde). Os stops abaixo são
+     as âncoras; a cor de cada célula é interpolada em ui/theme.js. */
+  --heat-0:  #58302c;
+  --heat-25: #5a4530;
+  --heat-50: #575330;
+  --heat-75: #46552e;
+  --heat-100:#305a3a;
+
+  /* barra de qualidade — CONTÍNUA (primeiro plano, mais saturada que o heatmap);
+     interpolada em ui/theme.js, que lê estes valores daqui */
+  --q-0:   #ef5a4d;
+  --q-25:  #ef8a4d;
+  --q-50:  #e6c24a;
+  --q-75:  #9fce4f;
+  --q-100: #4cc26a;
+
+  /* rank do item D→SSS+ (mesma escala dos imprints) */
+  --rank-d:   #9c968c;
+  --rank-c:   #4cc26a;
+  --rank-b:   #4d90ff;
+  --rank-a:   #b06bf0;
+  --rank-s:   #f5a623;
+  --rank-ss:  #f97316;
+  --rank-sss: #ef5a4d;
+  /* SSS+ não existe no imprint: holográfico (estilo carta UR) */
+  --rank-sss-plus: linear-gradient(92deg,#ff8f87,#ffd08a,#8ff0c0,#8fb6ff,#d79bf0);
+  --rank-sss-plus-glow: rgba(180,150,255,.4);   /* brilho leve do texto holográfico */
+
+  /* retrato do herói: anel preto para descolar do fundo (único preto do sistema) */
+  --portrait-ring: #000;
+
+  /* estrelas de raridade do herói — neutras, como o asset do jogo */
+  --star: #e8e3da;
+
+  /* forma */
+  --r-sm: 5px;
+  --r-md: 7px;
+  --r-lg: 10px;
+  --r-pill: 999px;
+
+  /* profundidade — só o que FLUTUA tem sombra (A Regra da Bancada Plana) */
+  --shadow-pop:   0 10px 26px rgba(0,0,0,.45);  /* dropdown aberto */
+  --shadow-modal: 0 20px 50px rgba(0,0,0,.5);   /* modal / popout */
+  --scrim:        rgba(0,0,0,.6);               /* véu atrás do modal */
+
+  /* tipografia */
+  --font: 'Archivo', system-ui, -apple-system, sans-serif;
+  --stretch-dense: 88%;   /* largura semicondensada: tabelas, listas de stat, cards de peça */
+  --fs-xs: 10px;   /* piso de texto do sistema: nada abaixo disto */
+  --fs-sm: 11px;
+  --fs-md: 12px;
+  --fs-lg: 13px;
+  --fs-xl: 15px;
+}

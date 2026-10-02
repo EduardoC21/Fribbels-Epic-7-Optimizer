@@ -1,0 +1,1304 @@
+/*
+ * features.css — layout das TELAS (casca, barra lateral, e as abas conforme
+ * forem entrando). Componentes burros ficam em components.css.
+ * Mesma regra: só var(--token).
+ */
+
+/* ================= casca ================= */
+.shell { height: 100%; display: flex; flex-direction: column; }
+
+.shell-nav {
+  display: flex; align-items: stretch; gap: 2px;
+  height: 42px; flex: none; padding: 0 12px;
+  background: var(--surface-3); border-bottom: 1px solid var(--line);
+}
+.shell-screen {
+  background: transparent; border: none; border-bottom: 2px solid transparent;
+  color: var(--text-2); font-size: var(--fs-lg); font-weight: 600;
+  padding: 0 16px; cursor: pointer; margin-bottom: -1px;
+}
+.shell-screen:hover { color: var(--text); }
+.shell-screen.on { color: var(--text); border-bottom-color: var(--accent); }
+.shell-status {
+  align-self: center; font-size: var(--fs-sm); color: var(--text-3);
+  padding: 4px 10px; border: 1px solid var(--line); border-radius: var(--r-pill);
+}
+.shell-status.ok { color: var(--text-2); border-color: var(--accent-border); }
+/* escuta do jogo (GameLink) */
+.game-link { display: flex; align-items: center; gap: 8px; margin-right: 8px; min-width: 0; }
+.game-link .shell-status { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.gl-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-3); flex: none; }
+.gl-dot.on { background: var(--ok); }
+/* relatório: botão de ícone (sem texto solto na barra) + lista ao clicar; aviso ignorável */
+.gl-rep-wrap { position: relative; display: inline-flex; }
+.gl-rep {
+  display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 7px; box-sizing: border-box;
+  border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--surface-2); color: var(--text-2); cursor: pointer;
+}
+.gl-rep:hover { border-color: var(--muted); color: var(--text); }
+.gl-rep.warn { color: var(--warn); border-color: var(--warn); }
+.gl-rep.bad { color: var(--bad); border-color: var(--bad); }
+.gl-n { font-size: var(--fs-xs); font-weight: 700; }
+.gl-pop { right: 0; left: auto; width: 420px; max-height: 360px; display: flex; flex-direction: column; gap: 2px; }
+.gl-row { display: flex; align-items: baseline; gap: 8px; padding: 6px 7px; border-radius: 6px; font-size: var(--fs-sm); line-height: 1.35; }
+.gl-row + .gl-row { border-top: 1px solid var(--line-soft); }
+.gl-at { color: var(--text-3); flex: none; font-size: var(--fs-xs); }
+.gl-txt { flex: 1 1 auto; min-width: 0; color: var(--text-2); overflow-wrap: anywhere; }
+.gl-row.warn .gl-txt { color: var(--warn); }
+.gl-row.bad .gl-txt { color: var(--bad); }
+.gl-ign {
+  flex: none; border: 1px solid var(--line); border-radius: var(--r-pill); background: transparent; color: var(--text-2);
+  font: inherit; font-size: var(--fs-xs); padding: 2px 8px; cursor: pointer;
+}
+.gl-ign:hover { color: var(--text); border-color: var(--muted); }
+
+.shell-body { flex: 1 1 0; min-height: 0; }
+.shell-pane { height: 100%; min-height: 0; }
+.shell-pane[hidden] { display: none; }
+.shell-error { padding: 20px; color: var(--bad); }
+
+/* ================= tela Herói ================= */
+.hero-screen { height: 100%; display: flex; min-height: 0; }
+/* área central: um scroll só para topo + abas + conteúdo da aba */
+.hero-main { flex: 1 1 0; min-width: 0; min-height: 0; padding: 14px 18px; }
+/* a barra de rolagem aparecer/sumir mudava a largura de TUDO (o topo "encolhia"
+   no quadro comparativo e engolia os stats do artefato): espaço dela reservado */
+.hero-main { scrollbar-gutter: stable; }
+.hero-col { display: flex; flex-direction: column; gap: 12px; padding-bottom: 14px; min-width: 0; }
+/* abas de LISTA (Principal, Construções): a lista ocupa o resto da tela e rola por dentro */
+/* min-height (não height): com a janela baixa a lista bate no piso de 320px e a
+   coluna CRESCE junto — com height:100% a lista transbordava e engolia o respiro
+   de baixo (padding-bottom), colando no fim da tela */
+.hero-col.fill { min-height: 100%; }
+.hero-col.fill > .tab-body { flex: 1 1 0; min-height: 320px; display: flex; flex-direction: column; }
+.tab-body > .pl, .tab-body > .cn { flex: 1 1 0; min-height: 0; }
+.tab-body .bt-box { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+.tab-body .bt-scroll { flex: 1 1 0; min-height: 0; max-height: none; }
+.shell-placeholder { max-width: 520px; }
+
+/* ================= topo do herói (comum às abas) ================= */
+.ht { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.pt-empty, .pt-noacc { padding: 18px; }
+.pt-noacc { border: 1px dashed var(--line); border-radius: var(--r-lg); flex: 1 1 auto; }
+.pt-err { color: var(--bad); font-size: var(--fs-sm); padding: 6px 12px; border: 1px solid var(--bad); border-radius: var(--r-md); }
+
+/*
+ * 4 colunas lado a lado só quando cabem (a janela abre maximizada: num monitor
+ * 1920 sobra espaço; num notebook 1366 não). Sem container query no Chromium
+ * do Electron 16, o corte é pela largura da janela:
+ *   barra lateral 340 + respiro 36 + colunas mínimas (148+200+240+430) + 3 vãos
+ *   ≈ 1440px. Abaixo disso, os equipamentos descem para uma linha própria.
+ */
+.pt-grid {
+  display: grid; gap: 12px; align-items: stretch;
+  grid-template-columns: 148px minmax(0, 1fr) minmax(0, 1.15fr);
+  grid-template-areas: "c1 c2 c3" "c4 c4 c4";
+}
+/* janela estreita (notebook com escala 125% ≈ 1093px, piso 1000px): 3 colunas
+   espremiam os nomes de stat ("Velocida…"). Calculado desce para a linha de baixo. */
+@media (max-width: 1279px) {
+  .pt-grid {
+    grid-template-columns: 148px minmax(0, 1fr);
+    grid-template-areas: "c1 c2" "c3 c3" "c4 c4";
+  }
+}
+@media (min-width: 1440px) {
+  .pt-grid {
+    grid-template-columns: 148px minmax(200px, 1fr) minmax(240px, 1.15fr) minmax(430px, 1.5fr);
+    grid-template-areas: "c1 c2 c3 c4";
+  }
+}
+/*
+ * ALTURA FIXA da linha do topo, igual em "minha build" e no comparativo. Sem
+ * isso a linha seguia a coluna mais alta de cada modo (cards de peça = 389px na
+ * sua build; bônus = 358px no comparativo) e o topo pulava ao trocar. 390px =
+ * o que os 6 cards de peça pedem; as colunas esticam para preencher.
+ */
+.pt-grid { grid-auto-rows: 390px; }
+.pt-col { display: flex; flex-direction: column; min-width: 0; }
+.pt-col.c1 { grid-area: c1; } .pt-col.c2 { grid-area: c2; } .pt-col.c3 { grid-area: c3; } .pt-col.c4 { grid-area: c4; }
+/* altura FIXA de cabeçalho: todas as caixas começam na mesma linha */
+.colh { height: 24px; flex: none; display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.colh-tools { display: inline-flex; align-items: center; gap: 6px; }
+
+/* ---- barra do herói ---- */
+.hb { display: flex; align-items: center; gap: 14px; padding: 10px 14px; }
+.hb-id { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.hb-name { font-size: 19px; font-weight: 700; line-height: 1; }
+.hb-out {
+  font-size: var(--fs-xs); color: var(--text-2); border: 1px solid var(--line);
+  border-radius: var(--r-pill); padding: 3px 8px; text-transform: uppercase; letter-spacing: .05em;
+}
+.hb-tog {
+  width: 36px; height: 36px; flex: none; border-radius: 9px;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--text-3);
+  display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.hb-tog:hover { border-color: var(--muted); color: var(--text-2); }
+.hb-tog.on { border-color: var(--accent); background: var(--accent-weak); color: var(--accent); }
+
+/* ---- 1 · bônus ---- */
+.bx-col { flex: 1 1 auto; display: flex; flex-direction: column; gap: 8px; }
+.bx { flex: 1 1 0; min-height: 104px; display: flex; flex-direction: column; padding: 7px 8px; }
+.bx.off .bx-foot { opacity: .5; }
+.bx-title { font-size: var(--fs-xs); color: var(--text-2); text-transform: uppercase; letter-spacing: .06em; display: inline-flex; align-items: center; gap: 5px; }
+.bx-center {
+  flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px; text-align: center;
+  background: none; border: none; color: inherit; padding: 4px 0; width: 100%;
+}
+.bx-center.clickable { cursor: pointer; border-radius: 6px; }
+.bx-center.clickable:hover { background: var(--surface-2); }
+.bx-name { font-size: var(--fs-sm); font-weight: 600; max-width: 100%; line-height: 1.1; }
+.bx-sub { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text-2); line-height: 1.1; }
+/* nunca corta: se apertar, quebra ENTRE os itens ("+91 ATK · / +819 HP") */
+.bx-sub { max-width: 100%; justify-content: center; text-align: center; }
+.bx-big { display: inline-flex; align-items: center; gap: 5px; font-size: 16px; font-weight: 700; line-height: 1; }
+/* EE: ícone + atributo centrados de verdade (o ícone não "puxa" a linha) */
+.bx-ee { display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 17px; font-weight: 700; line-height: 1; }
+.bx-ee .ui-ico { display: block; }
+.bx-input { width: 46px; color: var(--text); font-family: inherit; outline: none; }
+.bx-input:focus { border-color: var(--accent); }
+.bx-input::placeholder { color: var(--text-3); }
+/* Nada no centro encolhe: com overflow:hidden (das reticências) o flexbox
+   achatava o nome do artefato até 0px de altura quando a caixa apertava. */
+.bx-center > *, .bx-center .contents > * { flex: none; }
+.bx-note { font-size: var(--fs-sm); }
+.bx-foot { flex: none; display: flex; justify-content: center; }
+.bx-step { display: inline-flex; align-items: center; gap: 6px; }
+.bx-arw {
+  display: inline-flex; background: none; border: none; color: var(--text-2);
+  cursor: pointer; padding: 0 2px;
+}
+.bx-arw:hover:not([disabled]) { color: var(--text); }
+.bx-arw[disabled] { opacity: .3; cursor: default; }
+.bx-val {
+  min-width: 46px; text-align: center; font-size: var(--fs-sm); font-weight: 700;
+  border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; background: var(--surface-2);
+}
+
+/* ---- 2 e 3 · colunas de status ---- */
+.sc { flex: 1 1 auto; display: flex; flex-direction: column; padding: 10px 12px; }
+.sc-head { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid var(--line-soft); }
+.sc-cp { font-size: var(--fs-lg); font-weight: 700; }
+.sc-sets { margin-left: auto; display: flex; gap: 8px; }
+.sc-set { display: inline-flex; align-items: center; gap: 3px; }
+.sc-set b { font-size: 10px; color: var(--text-2); }
+/* linhas espalhadas pela altura inteira da caixa */
+.sc-list { font-stretch: var(--stretch-dense); flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-between; gap: 4px; }
+.sc-row { display: flex; align-items: center; gap: 8px; font-size: var(--fs-md); line-height: 1; min-width: 0; }
+.sc-ico { display: inline-flex; width: 14px; flex: none; color: var(--text-2); }
+.sc-nm { color: var(--text-2); min-width: 0; }
+.sc-val { margin-left: auto; font-weight: 600; flex: none; }
+/* ▲ ganho sobre a base, como na tela do herói no jogo (coluna fixa: alinha) */
+.sc-gain {
+  flex: none; width: 58px; display: inline-flex; align-items: center; justify-content: flex-end; gap: 3px;
+  font-size: var(--fs-sm); font-weight: 600; color: var(--accent);
+}
+.sc-base {
+  font-size: var(--fs-xs); color: var(--text-2); text-transform: uppercase; letter-spacing: .05em;
+  border: 1px solid var(--line); border-radius: var(--r-pill); padding: 3px 7px; white-space: nowrap;
+}
+
+/* ---- 4 · equipamentos ---- */
+/* áreas densas de número: largura semicondensada (Archivo, eixo wdth) */
+.gc, .bt, .cm-tr, .gn-tr { font-stretch: var(--stretch-dense); }
+.gg { flex: 1 1 auto; display: grid; gap: 7px; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: 1fr 1fr; }
+.gc {
+  display: flex; flex-direction: column; min-width: 0; min-height: 176px;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 9px;
+  padding: 7px 8px 6px; color: var(--text); text-align: left;
+}
+.gc.clickable { cursor: pointer; }
+.gc.clickable:hover { background: var(--surface-2); }
+.gc.empty { align-items: center; justify-content: center; border-style: dashed; }
+.gc.empty .ui-ico { opacity: .55; }
+.gc-head, .gc-main, .gc-foot { display: flex; align-items: center; gap: 6px; line-height: 1; }
+.gc-lvl { font-size: var(--fs-sm); font-weight: 700; color: var(--text-2); }
+.gc-lock { color: var(--text-2); flex: none; }
+.gc-div { display: block; border-top: 1px solid var(--line-soft); margin: 6px 0; }
+.gc-mn { font-size: var(--fs-sm); color: var(--text-2); }
+.gc-mv { margin-left: auto; font-size: var(--fs-lg); font-weight: 700; }
+/* os 4 substatus espalhados pela altura do card */
+.gc-subs { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-between; gap: 3px; }
+.gc-sub { display: flex; align-items: center; gap: 4px; font-size: var(--fs-sm); line-height: 1; min-width: 0; }
+.gc-sn { color: var(--text-2); }
+.gc-ups { font-weight: 700; letter-spacing: -1px; font-size: var(--fs-md); }
+.gc-ups.zero { color: var(--text-3); letter-spacing: 0; }
+.gc-sv { margin-left: auto; flex: none; }
+.gc-enh { font-size: var(--fs-sm); font-weight: 700; color: var(--accent); }
+/* rodapé: score · rank da peça · rank para o dono — mesmo corpo, centrados pelo meio; sem dono, os 2 ficam à direita */
+/* pior caso "110 · SSS+ · SSS+" = 107px: com o set e o +15 cabe nos 156px do card mais estreito (175px) */
+.gc-notes { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+.gc-notes .ui-rank { letter-spacing: 0; }
+.gc-foot { gap: 5px; }
+.gc-score { font-size: var(--fs-lg); font-weight: 800; }
+.gc-dot { color: var(--text-3); font-size: var(--fs-sm); }
+.gc-none { color: var(--text-3); font-size: var(--fs-lg); font-weight: 800; }
+
+/* ---- seletor de artefato ---- */
+.ap-search {
+  display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 10px;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; color: var(--text-3);
+  margin-bottom: 10px;
+}
+.ap-search:focus-within { border-color: var(--accent); }
+.ap-search input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-size: var(--fs-md); }
+.ap-list { max-height: 52vh; }
+.ap-row {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 8px;
+  background: none; border: none; border-radius: 7px; color: var(--text); cursor: pointer; text-align: left;
+}
+.ap-row:hover { background: var(--surface-2); }
+.ap-row.on { background: var(--accent-weak); }
+.ap-name { flex: 1 1 auto; min-width: 0; font-size: var(--fs-md); }
+/* arte de artefato = HEXÁGONO com cantos transparentes: nada de fundo, borda ou
+   canto arredondado por trás (sobrava um quadrado feio) — vale para o projeto todo */
+.ap-img { flex: none; object-fit: contain; background: none; border: none; border-radius: 0; }
+.ap-none { display: inline-block; width: 30px; height: 30px; border: 1px dashed var(--line); }
+
+/* ================= barra lateral ================= */
+.sb {
+  width: 340px; flex: none; height: 100%;
+  display: flex; flex-direction: column;
+  background: var(--surface-3); border-right: 1px solid var(--line);
+}
+.sb-list { flex: 1 1 0; min-height: 0; }
+.sb-empty { padding: 20px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+
+/* ---- filtros ---- */
+.hf { padding: 14px 14px 12px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 11px; flex: none; }
+.hf-title { display: flex; align-items: baseline; gap: 8px; }
+.hf-title b { font-size: var(--fs-xl); }
+.hf-title .sub { margin-left: auto; font-size: var(--fs-sm); }
+
+.hf-search {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+  padding: 0 8px 0 10px; height: 32px; color: var(--text-3);
+}
+.hf-search:focus-within { border-color: var(--accent); }
+.hf-search input {
+  flex: 1 1 0; min-width: 0; background: transparent; border: none; outline: none;
+  color: var(--text); font-size: var(--fs-md);
+}
+.hf-search input::placeholder { color: var(--text-3); }
+.hf-clear { display: inline-flex; background: none; border: none; color: var(--text-3); cursor: pointer; padding: 2px; }
+.hf-clear:hover { color: var(--text); }
+
+.hf-row { display: flex; align-items: center; gap: 7px; }
+.hf-lab { font-size: var(--fs-xs); color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; width: 68px; flex: none; }   /* 68: "ARQUÉTIPO" em 10px pede 65 */
+.hf-group { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.hf-tog {
+  width: 28px; height: 28px; flex: none; border-radius: 7px;
+  border: 1px solid var(--line); background: var(--surface);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--text-3); cursor: pointer; padding: 0;
+}
+.hf-tog:hover { border-color: var(--muted); color: var(--text-2); }
+.hf-tog.on { border-color: var(--accent); background: var(--accent-weak); color: var(--accent); }
+/* ícone de jogo apagado quando o filtro está desligado — acende ao ligar */
+.hf-tog .ui-ico { opacity: .55; }
+.hf-tog.on .ui-ico, .hf-tog:hover .ui-ico { opacity: 1; }
+
+.hf-star {
+  display: inline-flex; align-items: center; gap: 3px; height: 28px; padding: 0 10px;
+  border: 1px solid var(--line); border-radius: 7px; background: var(--surface);
+  color: var(--text-2); font-size: var(--fs-sm); cursor: pointer; line-height: 1;
+}
+.hf-star:hover { border-color: var(--muted); }
+.hf-star.on { border-color: var(--accent); background: var(--accent-weak); color: var(--text); }
+.hf-star .ui-glyph { color: var(--star); }
+
+.hf-arch { flex: 1 1 0; min-width: 0; }
+.hf-arch .ui-dd-wrap, .hf-arch .ui-dd { width: 100%; justify-content: space-between; }
+.hf-arch .ui-pop { width: 100%; }
+
+/* ---- linha de herói ---- */
+.hr {
+  position: relative; display: flex; align-items: stretch; gap: 10px;
+  padding: 8px 12px 8px 6px; min-height: 54px;
+  border-bottom: 1px solid var(--line-soft); cursor: pointer; user-select: none;
+}
+.hr:hover { background: var(--surface); }
+.hr.sel { background: var(--accent-weak); }
+.hr.sel::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--accent); }
+/* linha de encaixe do arrastar */
+.hr.drop-before { box-shadow: inset 0 2px 0 var(--accent); }
+.hr.drop-after  { box-shadow: inset 0 -2px 0 var(--accent); }
+/* linha focada pelo teclado: anel POR DENTRO (por fora o painel com rolagem cortaria) */
+.hr:focus-visible, .bt-row:focus-visible { outline-offset: -2px; }
+/* o cabeçalho da tabela é preso no topo: a linha focada não pode ficar por baixo dele */
+.bt-row[data-key] { scroll-margin-top: 32px; }
+
+.hr-handle { display: flex; align-items: center; color: var(--line); cursor: grab; flex: none; }
+.hr:hover .hr-handle { color: var(--text-3); }
+
+.hr-rank, .hr-rank-input {
+  width: 26px; flex: none; align-self: center; text-align: center;
+  font-size: var(--fs-md); font-weight: 700; color: var(--text-2);
+}
+.hr-rank { background: none; border: none; cursor: text; padding: 3px 0; border-radius: 4px; }
+.hr-rank:hover { background: var(--surface-2); color: var(--text); }
+.hr-rank-input {
+  background: var(--surface-2); border: 1px solid var(--accent); border-radius: 4px;
+  color: var(--text); padding: 2px 0; outline: none;
+}
+.hr .ui-portrait { align-self: center; }
+
+.hr-info { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 5px; }
+.hr-name { font-size: 12.5px; font-weight: 600; line-height: 1.1; }
+.hr-meta { display: flex; align-items: center; gap: 6px; }
+
+.hr-right { flex: none; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; gap: 6px; }
+.hr-flags { display: flex; align-items: center; gap: 5px; height: 13px; color: var(--accent); }
+.hr-sets { display: flex; align-items: center; gap: 6px; }
+.hr-set { display: inline-flex; align-items: center; gap: 2px; }
+.hr-set b { font-size: var(--fs-xs); color: var(--text-2); font-weight: 700; line-height: 1; }
+
+/* ================= lista de builds (Principal; Comunidade depois) ================= */
+.pl { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.pl > .label { margin: 0; }
+.pl-head { display: flex; align-items: center; gap: 10px; min-height: 26px; }
+.pl-head .label { margin: 0; }
+.pl-head .ui-btn { display: inline-flex; align-items: center; gap: 6px; padding-top: 4px; padding-bottom: 4px; }
+
+/* janelinhas das builds salvas (nome / apagar) */
+.bd { display: flex; flex-direction: column; gap: 12px; }
+.bd-input {
+  height: 34px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line); outline: none;
+  background: var(--surface-2); color: var(--text); font-family: inherit; font-size: var(--fs-md);
+}
+.bd-input:focus { border-color: var(--accent); }
+.bd-text { margin: 0; font-size: var(--fs-md); color: var(--text-2); }
+.bd-foot { display: flex; justify-content: flex-end; gap: 8px; }
+.ui-btn.bd-danger { color: var(--bad); border-color: var(--bad-border); }
+.ui-btn.bd-danger:hover:not([disabled]) { border-color: var(--bad); }
+.bt-empty { font-size: var(--fs-md); }
+.bt-scroll { max-width: 100%; max-height: 70vh; }
+.bt-head { position: sticky; top: 0; z-index: 3; }
+.bt { min-width: min-content; }
+.bt-row { display: grid; align-items: stretch; }
+/* lista virtual: altura FIXA de linha (BuildTable ROW_H = 31) */
+.bt-row.v { height: 31px; box-sizing: border-box; }
+.bt-row.v > * { min-height: 0; height: 30px; overflow: hidden; }
+.bt.virtual .bt-pad + .bt-row { border-top: 1px solid var(--line-soft); }
+.bt-row + .bt-row { border-top: 1px solid var(--line-soft); }
+.bt-head { background: var(--surface-2); border-bottom: 1px solid var(--line); }
+.bt-head + .bt-row { border-top: none; }
+
+/* cabeçalho: sigla curta; o nome inteiro está no tooltip */
+.bt-h {
+  display: flex; align-items: center; justify-content: center; gap: 2px;
+  padding: 7px 6px; font-family: inherit; font-size: var(--fs-xs); font-weight: 600; line-height: 1;
+  color: var(--text-2); text-transform: uppercase; letter-spacing: .04em; white-space: nowrap;
+  background: var(--surface-2); border: none;
+}
+.bt-h.l, .bt-f.l { justify-content: flex-start; }
+.bt-sort { cursor: pointer; }
+.bt-sort:hover { color: var(--text); }
+.bt-sort.on { color: var(--accent); }
+
+/* células: contíguas (sem vão) para o heatmap ler como faixa */
+.bt-c {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 30px; padding: 0 6px; font-size: var(--fs-sm); line-height: 1; white-space: nowrap;
+}
+.bt-f {
+  display: flex; align-items: center; justify-content: center; min-width: 0;
+  min-height: 30px; padding: 0 6px; font-size: var(--fs-sm); line-height: 1; color: var(--text-2);
+}
+.bt-row:not(.bt-head):hover .bt-c { filter: brightness(1.18); }
+.bt-row:not(.bt-head):hover .bt-f { color: var(--text); }
+
+/* Marcar/Fonte/Sets/Arq presas à esquerda quando a lista rola na horizontal
+   (o `left` de cada uma vem do BuildTable, que sabe quais existem) */
+.bt .st { position: sticky; z-index: 1; background: var(--surface); }
+.bt-head .st { background: var(--surface-2); z-index: 4; }
+.bt .st.last { border-right: 1px solid var(--line-soft); }
+/* build em uso (as peças equipadas agora): a Fonte ganha o destaque */
+.bt-f.in-use .bt-origin { color: var(--accent); box-shadow: 0 0 0 1px var(--accent-border); border-radius: 5px; padding: 2px; }
+
+.bt-origin { display: inline-flex; align-items: center; color: var(--text-2); }
+.bt-origin.o-equipped { color: var(--accent); }
+.bt-sets { display: inline-flex; align-items: center; gap: 3px; }
+.bt-inuse {
+  flex: none; margin-left: 6px; font-size: var(--fs-xs); color: var(--accent);
+  border: 1px solid var(--accent-border); border-radius: var(--r-pill); padding: 2px 6px;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+
+/* ================= abas Estatísticas e Construções ================= */
+.cn { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+/* Artefatos: nome | % */
+.cm-tr.art { grid-template-columns: minmax(0, 1fr) 58px; }
+.cm-art { display: inline-flex; align-items: center; gap: 7px; min-width: 0; }
+.cm-con.all .cm-con-top { font-weight: 500; color: var(--text-2); }
+.cm { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.cm-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; max-width: 620px; }
+.cm-empty p { margin: 0; }
+
+/* faixa das abas: tier do RTA + baixar */
+.cm-actions { display: inline-flex; align-items: center; gap: 10px; }
+.cm-tier { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); }
+.cm-actions .ui-btn { display: inline-flex; align-items: center; gap: 6px; }
+
+/* 4 caixas: lado a lado no monitor grande, 2×2 no notebook */
+.cm-grid { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 1440px) {
+  .cm-grid { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, .9fr); }
+}
+.cm-box { display: flex; flex-direction: column; padding: 10px 12px; min-width: 0; height: 236px; }
+.cm-hd { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; flex: none; min-width: 0; }
+.cm-hd .label { margin: 0; flex: none; }
+.cm-hd .sub { margin-left: auto; font-size: var(--fs-xs); min-width: 0; }
+.cm-none { font-size: var(--fs-sm); }
+.cm-sets { display: inline-flex; align-items: center; gap: 3px; flex: none; }
+
+/* construções */
+.cm-scroll { flex: 1 1 auto; min-height: 0; }
+.cm-cons { display: flex; flex-direction: column; gap: 6px; }
+.cm-con {
+  display: flex; flex-direction: column; gap: 5px; text-align: left; cursor: pointer;
+  border: 1px solid var(--line-soft); border-radius: 8px; padding: 7px 8px;
+  background: var(--surface); color: var(--text); font-family: inherit;
+}
+.cm-con:hover { border-color: var(--muted); }
+.cm-con.on { border-color: var(--accent); background: var(--accent-weak); }
+.cm-con-top { display: flex; align-items: center; gap: 7px; font-size: var(--fs-md); font-weight: 600; line-height: 1; min-width: 0; }
+.cm-pct { margin-left: auto; color: var(--accent); flex: none; }
+.cm-con-ks { font-size: var(--fs-xs); color: var(--text-2); line-height: 1; }
+
+/* tabelinhas (RTA, estatísticas): linhas espalhadas pela altura */
+.cm-tbl { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-between; min-height: 0; overflow-y: auto; }
+.cm-tr { display: grid; grid-template-columns: minmax(0, 1fr) 52px 60px; gap: 8px; align-items: center; font-size: var(--fs-sm); line-height: 1; }
+.cm-tr.st { grid-template-columns: minmax(0, 1fr) 58px 78px; }
+.cm-th { font-size: var(--fs-xs); color: var(--text-2); text-transform: uppercase; letter-spacing: .04em; padding-bottom: 5px; border-bottom: 1px solid var(--line-soft); }
+.cm-tr .r { text-align: right; }
+.cm-tr .win { color: var(--ok); font-weight: 600; }
+.cm-tr .loss { color: var(--bad); font-weight: 600; }
+.cm-stat { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); min-width: 0; }
+
+/* filtros */
+.cm-filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cm-filters .ui-dd-wrap { width: 150px; }
+.cm-filters .ui-dd { width: 100%; }
+.cm-hint { font-size: var(--fs-xs); margin-left: auto; }
+/* construção sem combo dominante: o combo mais comum aparece apagado + "~" */
+.cm-mixed { display: inline-flex; align-items: center; opacity: .55; }
+.cm-mixed::after { content: '~'; margin-left: 2px; color: var(--text-2); font-weight: 700; }
+.cm-warn { font-size: var(--fs-sm); color: var(--text-2); border: 1px dashed var(--line); border-radius: var(--r-md); padding: 6px 10px; }
+
+/* ================= build-alvo no topo ================= */
+.hb-badge {
+  font-size: var(--fs-xs); color: var(--accent); background: var(--accent-weak);
+  border: 1px solid var(--accent-border); border-radius: var(--r-sm); padding: 3px 7px;
+  letter-spacing: .03em; white-space: nowrap; max-width: 320px; overflow: hidden; text-overflow: ellipsis;
+}
+.hb-exit {
+  display: inline-flex; align-items: center; gap: 6px; flex: none; cursor: pointer;
+  font-family: inherit; font-size: var(--fs-sm); color: var(--text-2);
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-pill); padding: 6px 12px;
+}
+.hb-exit:hover { color: var(--text); border-color: var(--muted); }
+/* bônus em simulação: mesmo layout, em tom de destaque (não grava nada) */
+.bx-col.sim .bx { background: var(--accent-weak); border-color: var(--accent-border); }
+
+/* coluna 4: o que o gear precisa entregar */
+.gn { flex: 1 1 auto; display: flex; flex-direction: column; gap: 9px; padding: 10px 12px; min-width: 0; }
+.gn.is-loading { opacity: .6; }
+.gn-msg { justify-content: center; align-items: center; font-size: var(--fs-sm); }
+.gn-mains { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.gn-main {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px;
+  border: 1px solid var(--line); border-radius: 7px; min-width: 0;
+}
+.gn-main.ok { border-color: var(--ok); }
+.gn-main.no { border-color: var(--bad); }
+.gn-main-top { display: inline-flex; align-items: center; gap: 5px; font-size: var(--fs-lg); font-weight: 700; line-height: 1; }
+.gn-main-slot { font-size: var(--fs-xs); color: var(--text-2); text-transform: uppercase; letter-spacing: .04em; }
+.gn-tr { display: grid; grid-template-columns: 70px minmax(0, 1fr) 46px 46px 50px; gap: 8px; align-items: center; font-size: var(--fs-sm); line-height: 1; }
+.gn-th { font-size: var(--fs-xs); color: var(--text-2); text-transform: uppercase; letter-spacing: .03em; padding-bottom: 5px; border-bottom: 1px solid var(--line-soft); }
+.gn-tr .r { text-align: right; }
+.gn-list { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; }
+.gn-stat { display: inline-flex; align-items: center; gap: 5px; color: var(--text-2); }
+.gpos { color: var(--ok); font-weight: 600; }
+.gneg { color: var(--bad); font-weight: 600; }
+
+/* linhas clicáveis da lista de builds (escolhem a build-alvo) */
+.bt-row.pickable { cursor: pointer; }
+.bt-row.picked .bt-f, .bt-row.picked .bt-c { box-shadow: inset 0 1px 0 var(--accent), inset 0 -1px 0 var(--accent); }
+.bt-row.picked .first { box-shadow: inset 2px 0 0 var(--accent), inset 0 1px 0 var(--accent), inset 0 -1px 0 var(--accent); }
+
+/* ================= aba Otimizador ================= */
+.op { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr) minmax(320px, 400px); align-items: stretch; }
+/* janela estreita: a caixa Comunidade desce (lado a lado a caixa Personagem cortava
+   e a barra de prioridade encolhia até ~17px em 1280) */
+@media (max-width: 1439px) { .op { grid-template-columns: minmax(0, 1fr); } }
+.op-empty { max-width: 560px; }
+.op-empty p { margin: 0 0 6px; }
+.op-box { display: flex; flex-direction: column; min-width: 0; }
+/* cabeçalho de altura FIXA nas duas caixas: as 8 linhas de stat ficam alinhadas */
+/* topo de altura FIXA nas duas caixas (título + 1 linha): as 8 linhas de stat ficam alinhadas */
+.op-head { height: 44px; flex: none; display: flex; flex-direction: column; justify-content: center; padding: 0 12px; border-bottom: 1px solid var(--line); }
+.op-head .ui-btn { padding-top: 4px; padding-bottom: 4px; }
+/* Personagem: campos de seleção numa coluna à esquerda das barras */
+.op-split { flex: 1 1 auto; display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: 0; }
+.op-fields { display: flex; flex-direction: column; justify-content: space-between; gap: 4px; padding: 8px 12px; border-right: 1px solid var(--line-soft); }
+.op-frow { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.op-setwarn { font-size: var(--fs-sm); line-height: 1.35; color: var(--warn); padding: 2px 0 2px 76px; }
+.op-statcol { display: flex; flex-direction: column; min-width: 0; }
+.op-hrow { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.op-hrow .label { margin: 0; flex: none; }
+.op-hint { font-size: var(--fs-xs); display: inline-flex; align-items: center; gap: 4px; }
+.op-lab { width: 68px; flex: none; font-size: var(--fs-xs); color: var(--text-2); text-transform: uppercase; letter-spacing: .04em; }
+.op-grow { flex: 1 1 0; min-width: 0; display: flex; }
+.op-grow .ui-dd-wrap, .op-grow .ui-dd { width: 100%; }
+.op-cols { flex: none; padding: 8px 12px 4px; display: grid; gap: 10px; align-items: center; font-size: var(--fs-xs); color: var(--text-2); text-transform: uppercase; letter-spacing: .04em; }
+/* prioridade: piso de 90px (barra de 64px = 16px por passo, dá para arrastar) */
+.op-lcols, .op-lrow { grid-template-columns: 112px minmax(90px, 1fr) 64px 64px; }
+.op-prio .ui-pbar { min-width: 64px; }
+/* piso da janela (1000px): a coluna de campos cede 30px para a barra caber */
+@media (max-width: 1279px) {
+  .op-split { grid-template-columns: 220px minmax(0, 1fr); }
+  /* em 1000px as colunas mínimas (112+90+64+64) passavam 14px da caixa: stat e mín/máx cedem 24px */
+  .op-lcols, .op-lrow { grid-template-columns: 104px minmax(90px, 1fr) 56px 56px; }
+}
+.op-rcols, .op-rrow { grid-template-columns: 34px 64px 64px minmax(0, 1fr); }
+.op-cols .c, .op-row .c { text-align: center; justify-content: center; }
+.op-cols .r, .op-row .r { text-align: right; }
+.op-body { flex: 1 1 auto; display: flex; flex-direction: column; padding: 2px 12px 8px; }
+.op-row { flex: 1 1 0; min-height: 30px; display: grid; gap: 10px; align-items: center; border-bottom: 1px solid var(--line-soft); font-size: var(--fs-md); }
+.op-row:last-child { border-bottom: none; }
+.op-stat { display: inline-flex; align-items: center; gap: 7px; color: var(--text-2); line-height: 1; min-width: 0; }
+.op-prio { display: flex; align-items: center; gap: 10px; }
+.op-prio b { width: 16px; text-align: right; font-size: var(--fs-sm); color: var(--text-2); }
+.op-num { width: 100%; text-align: center; }
+.ui-pbar.editable { cursor: pointer; }
+/* comunidade */
+.op-nav { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-md); }
+.op-src { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font-size: var(--fs-md); font-weight: 600; }
+.op-src-name { min-width: 0; }
+.op-chip { flex: none; font-size: var(--fs-xs); color: var(--accent); background: var(--accent-weak); border: 1px solid var(--accent-border); border-radius: var(--r-pill); padding: 2px 8px; }
+.op-sets { display: inline-flex; gap: 3px; flex: none; }
+.op-apply {
+  width: 28px; height: 24px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--text-2);
+}
+.op-apply:hover:not([disabled]) { border-color: var(--accent); color: var(--accent); }
+.op-apply[disabled] { opacity: .35; cursor: default; }
+.op-apply.all { border-color: var(--accent); color: var(--accent); }
+
+/* ================= popout de item (modelo C2/C3) ================= */
+/* quem rola é o FUNDO (os menus suspensos da peça não podem ser cortados).
+   Ancorado no TOPO (não centralizado): ao abrir Editar campos ou a gema o popout
+   cresce só para baixo — centralizado, o cabeçalho subia junto com a animação */
+.ip-back { overflow: auto; align-items: flex-start; padding: 16px 0; }
+.ip {
+  width: 760px; max-width: calc(100vw - 32px); margin: 8vh auto 16px;   /* 760: cabem 5 botões de up na coluna do meio */
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-modal); display: flex; flex-direction: column;
+}
+/* formulário: campo preenchido é o normal, não "filtro ativo" */
+/* editor EMBUTIDO (tela Equipamentos, janela larga): mesma peça, sem moldura de diálogo; altura
+   fixa = a do editor fechado (medida na sonda); o corpo rola quando abre Editar campos ou a gema */
+.ip-body { display: contents; }
+.ip.inline { width: auto; max-width: none; margin: 0; box-shadow: none; height: var(--ip-inline-h); flex: none; min-height: 0; }
+.ip.inline .ip-body { display: block; flex: 1 1 0; min-height: 0; overflow: auto; scrollbar-gutter: stable; }
+.ip.inline .ip-foot { margin-top: 0; }
+.ip .ui-dd.filled { border-color: var(--line); background: var(--surface-2); }
+.ip .ui-dd.open { border-color: var(--accent); }
+.ip .ui-dd .caret { margin-left: auto; flex: none; }
+.ip .acc { color: var(--accent); }
+.ip .ok { color: var(--ok); }
+.ip-cap { font-size: var(--fs-xs); color: var(--text-2); text-transform: uppercase; letter-spacing: .08em; }
+.ip-kicker { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .1em; color: var(--text-2); font-weight: 700; }
+.ip-lbl { font-size: var(--fs-xs); color: var(--text-2); }
+.ip-note { font-size: var(--fs-xs); color: var(--text-3); }
+.ip-note.warn, .ip-cap.warn { color: var(--warn); }
+.ip-pill {   /* estado da linha, não ação: neutro (a Chama Única fica para ação/seleção) */
+  font-size: var(--fs-xs); color: var(--text-2); border: 1px solid var(--line); border-radius: var(--r-pill);
+  padding: 1px 6px; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap;
+}
+
+/* identidade */
+.ip-head { display: flex; align-items: center; gap: 7px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.ip-gear {
+  width: 52px; height: 52px; flex: none; border: 2px solid var(--normal); border-radius: var(--r-lg); background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+}
+.ip-id { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.ip-title { display: flex; align-items: center; gap: 8px; font-size: var(--fs-md); }
+.ip-title b { font-size: var(--fs-xl); }
+/* Travado / Não modificável ligados: só o símbolo (a edição fica em Editar campos) */
+.ip-flags { display: inline-flex; align-items: center; gap: 6px; margin-left: 2px; color: var(--text-2); }
+.ip-flag { display: inline-flex; align-items: center; }
+.ip-flag.nomod { position: relative; opacity: .8; }
+.ip-flag.nomod::after {   /* risco: "sem gema" */
+  content: ''; position: absolute; left: -1px; right: -1px; top: 50%; height: 1.5px;
+  background: var(--text-2); transform: rotate(-45deg);
+}
+.ip-meta { font-size: var(--fs-sm); color: var(--text-2); }
+/* score · peça · herói, largura fixa: nada se mexe quando o valor muda (cabe de D a SSS+ 100%) */
+.ip-scores { display: flex; gap: 4px; flex: none; }
+/* nota do que está GRAVADO com alteração pendente: marca em Amarelo Atenção, sem
+   apagar o texto (a 45% de opacidade o contraste caía para 2,2–2,7:1) */
+.ip-score-v { border-bottom: 1px dashed transparent; }
+.ip-scores.stale .ip-score:nth-child(-n+2) .ip-score-v { border-bottom-color: var(--warn); }   /* score e peça (a do herói ainda é "—") */
+/* as três caixas com o MESMO formato (respiro e borda reservada): alinham, e a do herói (botão) só acende a borda */
+.ip-score { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 98px; box-sizing: border-box;
+  padding: 5px 4px; border: 1px solid transparent; border-radius: var(--r-md); }
+.ip-scores > .ip-score:first-child { width: 64px; }
+/* letra/número grandes e % pequeno centrados pelo MEIO (pela base o % parecia caído) */
+.ip-score-v { display: inline-flex; align-items: center; gap: 4px; height: 24px; white-space: nowrap; }
+.ip-score-n { font-size: 19px; font-weight: 800; line-height: 1; }
+/* nota do herói = caixinha: abre as 4 notas por modo da pedra */
+.ip-hnote-wrap { position: relative; display: inline-flex; flex: none; }
+.ip-scores > .ip-score { flex: none; }
+button.ip-hnote { background: transparent; color: inherit; font: inherit; line-height: inherit; cursor: pointer; }
+button.ip-hnote:hover:not(:disabled), button.ip-hnote.open { background: var(--surface-2); border-color: var(--line); }
+button.ip-hnote.open { border-color: var(--accent); }
+button.ip-hnote:disabled { cursor: default; }
+button.ip-hnote .ip-cap { display: inline-flex; align-items: center; gap: 3px; }
+.ip-hnote-pop { right: 0; left: auto; width: 230px; }
+.ip-hnote-opt { display: grid; grid-template-columns: 14px minmax(0, 1fr) 36px 34px; gap: 8px; }
+.ip-hnote-opt .ui-rank { justify-self: center; }
+.ip-hnote-opt .sub { text-align: right; }
+.ui-rank.lg { font-size: 19px; }   /* = display do DESIGN.md */
+.ip-vr { width: 1px; height: 36px; background: var(--line); flex: none; }
+.ip-owner-wrap { position: relative; flex: none; }
+.ip-owner {
+  display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface-2);
+  color: var(--text); padding: 4px 8px 4px 4px; font-family: inherit; cursor: pointer; max-width: 168px;
+}
+.ip-owner:hover { border-color: var(--muted); }
+.ip-owner-txt { display: flex; flex-direction: column; gap: 2px; text-align: left; min-width: 0; }
+.ip-owner-txt .ip-cap { white-space: nowrap; }
+.ip-owner-name { font-size: var(--fs-md); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ip-owner .caret { color: var(--text-2); flex: none; }
+.ip-owner-none { width: 32px; height: 32px; border-radius: 50%; border: 1.5px dashed var(--text-3); flex: none; }
+.ip-owner-none.sm { width: 20px; height: 20px; }
+/* a busca fica presa no topo; só a lista rola */
+.ip-owner-pop { right: 0; left: auto; width: 240px; max-height: 320px; overflow: hidden; display: flex; flex-direction: column; }
+.ip-owner-q { width: calc(100% - 12px); margin: 6px; text-align: left; flex: none; }
+.ip-owner-list { overflow-y: auto; min-height: 0; }
+.ip-x {
+  width: 30px; height: 30px; flex: none; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-2);
+  color: var(--text-2); display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.ip-x:hover { color: var(--text); }
+
+/* ficha */
+.ip-sheet { padding: 12px 16px 4px; }
+/* Stat com largura fixa (o valor fica perto do nome); a sobra vai para a coluna do meio */
+/* # · Stat · Valor · troca da pedra (→ valor esperado) · Ups · coluna do meio · Modificar */
+.ip-grid { display: grid; gap: 10px; align-items: center; grid-template-columns: 34px 210px 72px 58px 58px minmax(118px, 1fr) 74px; }
+.ip-grid .r { text-align: right; justify-self: end; }
+.ip-grid .c { text-align: center; justify-self: center; }
+.ip-grid .ui-num.r { width: 72px; }
+.ip-grid .ui-dd-wrap, .ip-grid .ui-dd { width: 100%; }
+.ip-gh { height: 32px; padding: 0 0 4px; border-bottom: 1px solid var(--line); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .08em; color: var(--text-2); }
+.ip-row { height: 40px; font-size: var(--fs-lg); }
+.ip-row.main { height: 44px; border-bottom: 1px solid var(--line-soft); }
+.ip-idx { font-size: var(--fs-xs); color: var(--text-3); text-align: center; }
+.ip-idx.acc { font-size: var(--fs-xs); font-weight: 700; }
+.ip-stat { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.ip-modmark { color: var(--text-2); }   /* substatus modificado: o símbolo do jogo, como na ficha do jogo */
+/* pedra simulada: atributo novo (depois do nome) e valor esperado (coluna própria), seta = Glyph arrow-right */
+.ip-gem { display: inline-flex; align-items: center; gap: 5px; color: var(--accent); font-weight: 600; white-space: nowrap; line-height: 1; }
+.ip-gem .ui-ico, .ip-gem .ui-glyph { flex: none; }
+.ip-stat .ip-gem { margin-left: 2px; }
+.ip-mainv { font-size: var(--fs-xl); }
+.ip-mid { text-align: center; font-size: var(--fs-lg); color: var(--text); display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+.ip-arrow { color: var(--text-3); flex: none; }
+.ip-mid.sub { font-size: var(--fs-sm); }
+/* ups em destaque na coluna do meio (peça 88/90 no +15) */
+.ip-upsbig { font-size: 19px; font-weight: 800; letter-spacing: 1px; }   /* 19px = display do DESIGN.md */
+.ip-upsbig.zero { color: var(--text-3); letter-spacing: 0; }
+/* ups editáveis (Editar campos): 5 marcações, as ligadas na cor do nº de ups */
+.ip-upsedit { display: inline-flex; font-size: var(--fs-xl); font-weight: 800; border-radius: var(--r-sm); padding: 0 2px; }
+.ip-upsedit i { font-style: normal; width: 9px; text-align: center; color: var(--muted); cursor: pointer; }
+.ip-upsedit i.on { color: inherit; }
+.ip-upsedit i:hover { color: var(--text); }
+.ip-gh .warn { color: var(--warn); }
+/* próximo up: cada valor é um botão — clicar soma na linha e sobe para o próximo +3 */
+.ip-ups { display: flex; justify-content: center; gap: 4px; flex-wrap: nowrap; }
+.ip-upv {
+  min-width: 30px; height: 24px; padding: 0 6px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface-2); color: var(--text-2); font: inherit; font-size: var(--fs-sm); cursor: pointer;
+  transition: border-color .15s ease, color .15s ease;
+}
+.ip-upv:hover { border-color: var(--accent); color: var(--text); }
+.ip-upv[aria-disabled="true"] { cursor: not-allowed; opacity: .35; }
+.ip-upv[aria-disabled="true"]:hover { border-color: var(--line); color: var(--text-2); }
+/* modificar: botão de ícone da casa (símbolo do jogo em máscara, sem fundo de arte) */
+.ip-modbtn {
+  justify-self: center; width: 32px; height: 28px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface-2); color: var(--text-2); display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: border-color .15s ease, color .15s ease;
+}
+.ip-modbtn:hover { border-color: var(--accent); color: var(--accent); }
+.ip-modbtn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-weak); }
+/* bloqueado continua FOCÁVEL (aria-disabled): o motivo chega pelo teclado */
+.ip-modbtn[aria-disabled="true"] { cursor: not-allowed; opacity: .35; }
+.ip-modbtn[aria-disabled="true"]:hover { border-color: var(--line); color: var(--text-2); }
+/* Reforjar: no lugar do título da coluna "após reforja" (não ocupa linha própria) */
+.ip-refbtn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border: 1px solid var(--accent-border);
+  border-radius: var(--r-md); background: none; color: var(--accent); font: inherit; font-size: var(--fs-sm); font-weight: 700; cursor: pointer;
+  text-transform: inherit; letter-spacing: inherit; transition: border-color .15s ease, background-color .15s ease;
+}
+.ip-refbtn:hover { border-color: var(--accent); background: var(--accent-weak); }
+
+/* cada linha de substatus + o painel de gema (abre por baixo, gradual) */
+.ip-rw { border-bottom: 1px solid var(--line-soft); border-radius: 0; transition: background-color .22s ease, box-shadow .22s ease; }
+.ip-rw:last-child { border-bottom-color: transparent; }
+.ip-rw.open { box-shadow: 0 0 0 1px var(--accent-border); border-radius: var(--r-md); border-bottom-color: transparent; }
+.ip-rw.open > .ip-row { border-bottom: 1px solid var(--line-soft); }
+.ip-mod { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+.ip-mod-sec { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ip-mod-grid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: end; }
+.ip-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ip-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid var(--line); border-radius: var(--r-pill);
+  background: var(--surface-2); color: var(--text-2); font-family: inherit; font-size: var(--fs-md); cursor: pointer;
+}
+.ip-chip:hover { color: var(--text); }
+.ip-chip.on { border-color: var(--accent); background: var(--accent-weak); color: var(--text); }
+.ip-quick { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.ip-qv {
+  min-width: 34px; padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-2);
+  color: var(--text); font-family: inherit; font-size: var(--fs-md); cursor: pointer;
+}
+.ip-qv.on { border-color: var(--accent); background: var(--accent-weak); font-weight: 700; }
+.ip-quick .ui-num { width: 70px; }
+.ip-mod-range { font-size: var(--fs-sm); color: var(--text); white-space: nowrap; }
+.ip-mod-range .sub { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; }
+.ip-mod-res { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ip-mod-foot { display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--line-soft); padding-top: 10px; font-size: var(--fs-md); flex-wrap: wrap; }
+
+/* editar campos */
+.ip-edit { margin: 10px 16px 0; border: 1px solid var(--line); border-radius: var(--r-lg); }
+.ip-edit-h {
+  width: 100%; display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: none; border: none;
+  color: var(--text-2); font-family: inherit; cursor: pointer; text-align: left;
+}
+.ip-edit-h:hover { color: var(--text); }
+.ip-edit-t { font-size: var(--fs-md); font-weight: 600; color: var(--text); flex: none; }
+.ip-edit-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 14px; padding: 4px 12px 12px; }
+.ip-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.ip-field .ui-dd-wrap, .ip-field .ui-dd { width: 100%; }
+.ip-field > .ui-seg, .ip-field > .ui-stepper { align-self: flex-start; }
+.ip .ui-seg-opt { min-height: 24px; }   /* alvo mínimo de 24px (WCAG 2.5.8) */
+.ip-checks { display: flex; flex-wrap: wrap; gap: 6px 14px; min-height: 30px; align-items: center; }
+
+/* ações da peça e rodapé */
+.ip-actions { display: flex; align-items: center; gap: 8px; margin: 10px 16px 0; }
+.ip-actions .ui-btn { display: inline-flex; align-items: center; gap: 6px; }
+.ip .ui-btn.danger { color: var(--bad); border-color: var(--bad-border); background: transparent; }   /* sobre --surface: 4,95:1 (sobre --surface-2 dava 4,45) */
+.ip .ui-btn.danger:hover { border-color: var(--bad); }
+.ip .ui-btn.danger.solid { background: var(--bad); color: var(--ink); border-color: var(--bad); font-weight: 600; }
+.ip-confirm { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-md); }
+/* erro: curto, no rodapé (sem faixa própria); o texto inteiro fica no tooltip */
+.ip-err {
+  flex: 1; min-width: 0; font-size: var(--fs-sm); color: var(--bad); overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+/* fechar com alteração pendente: o Salvar pisca (em vez de uma faixa de aviso) */
+.ip-nudge { display: inline-flex; border-radius: var(--r-pill); }
+/* duas classes alternadas reiniciam a animação sem recriar o botão (o foco não se perde) */
+.ip-nudge.n0 { animation: ip-nudge0 .7s ease 2; }
+.ip-nudge.n1 { animation: ip-nudge1 .7s ease 2; }
+@keyframes ip-nudge0 { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 0 3px var(--accent-border); } }
+@keyframes ip-nudge1 { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 0 3px var(--accent-border); } }
+.ip-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .ip-nudge.n0, .ip-nudge.n1 { animation: none; box-shadow: 0 0 0 2px var(--accent); } }
+.ip-foot { display: flex; align-items: center; gap: 14px; padding: 12px 16px; margin-top: 10px; border-top: 1px solid var(--line); }
+.ip-check { display: inline-flex; align-items: center; gap: 7px; font-size: var(--fs-md); color: var(--text-2); cursor: pointer; }
+
+/* ================= tela Arquétipos ================= */
+/* barra lateral: reaproveita .sb/.hf/.hr da tela Herói */
+.ab-new { width: 100%; }
+.ab-row { align-items: center; padding-left: 12px; }
+.ab-row-none { font-size: var(--fs-xs); color: var(--text-3); }
+.ab-row-users { color: var(--text-2); gap: 4px; }
+.ab-row-users b { font-size: var(--fs-xs); font-weight: 700; }
+.ab-error { color: var(--bad); font-size: var(--fs-sm); padding: 6px 12px; border: 1px solid var(--bad); border-radius: var(--r-md); margin-bottom: 12px; }
+
+.ab { display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: 100%; }
+/* barra do arquétipo = barra do herói; o nome é editável ali mesmo */
+.ab-name {
+  flex: 1 1 auto; min-width: 0; font-family: inherit; font-size: 19px; font-weight: 700; line-height: 1.2;
+  color: var(--text); background: transparent; border: none; border-bottom: 1px dashed transparent;
+  padding: 2px 0; outline: none;
+}
+.ab-name:hover { border-bottom-color: var(--muted); }
+.ab-name:focus { border-bottom: 1px solid var(--accent); }
+.ab-name::placeholder { color: var(--text-3); font-weight: 400; }
+
+.ab-top { display: grid; gap: 12px; grid-template-columns: auto minmax(240px, 1fr); align-items: stretch; }
+/* lado a lado enquanto couber (símbolo ~540px + heróis ≥240px); empilhado, a lista de heróis tem altura própria */
+@media (max-width: 1179px) { .ab-top { grid-template-columns: minmax(0, 1fr); } .ab-hlist { flex: none; max-height: 150px; } }
+.ab-box { display: flex; flex-direction: column; min-width: 0; }
+.ab-head { height: 24px; box-sizing: content-box; flex: none; display: flex; align-items: center; gap: 8px; padding: 10px 12px 0; }
+.ab-head .label { margin: 0; }
+
+/* Símbolo: prévia grande à esquerda (a bancada), controles à direita */
+.ab-sym-body { flex: 1 1 auto; display: flex; gap: 14px; padding: 6px 12px 10px; align-items: center; }
+.ab-preview { flex: none; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.ab-mini { display: flex; align-items: center; gap: 8px; }
+.ab-ctrls { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.ab-crow { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; min-height: 34px; }
+.ab-lab { width: 58px; flex: none; font-size: var(--fs-xs); color: var(--text-2); text-transform: uppercase; letter-spacing: .04em; }
+
+/* classe: grupo de rádio (Segmented) com a ARTE ORIGINAL da classe (branca; o recorte em currentColor ficava quebrado
+   no tamanho pequeno). Ligado = o mesmo dos botões de stat ao lado (fundo brasa + borda accent), não o claro do Segmented */
+.ab-cls .ui-seg-opt { width: 38px; height: 34px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.ab-cls .ui-seg-opt .ui-ico { opacity: .6; }
+.ab-cls .ui-seg-opt:hover .ui-ico { opacity: .9; }
+.ab-cls .ui-seg-opt.on { background: var(--accent-weak); box-shadow: inset 0 0 0 1px var(--accent); }
+.ab-cls .ui-seg-opt.on .ui-ico { opacity: 1; }
+.ab-cls .ui-seg-opt:focus-visible { outline-offset: -2px; }   /* o grupo corta o que passa da borda */
+
+/* stats: até 3, na ordem escolhida (o número = posição no símbolo) */
+.ab-stats { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+.ab-tog {
+  position: relative; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-2); cursor: pointer;
+}
+.ab-tog .ui-ico { opacity: .8; }   /* os ícones de stat já são cinza */
+.ab-tog:hover:not([disabled]) { border-color: var(--muted); }
+.ab-tog:hover:not([disabled]) .ui-ico { opacity: 1; }
+.ab-tog.on { border-color: var(--accent); background: var(--accent-weak); }
+.ab-tog.on .ui-ico { opacity: 1; }
+.ab-tog[disabled] { cursor: not-allowed; opacity: .4; }
+.ab-ord {
+  position: absolute; top: -6px; right: -6px; min-width: 15px; height: 15px; padding: 0 3px; box-sizing: border-box;
+  border-radius: var(--r-pill); background: var(--accent); color: var(--ink);
+  font-size: var(--fs-xs); font-weight: 700; line-height: 15px; text-align: center;
+}
+.ab-count { font-size: var(--fs-sm); }
+
+/* cores: amostra nativa + código */
+.ab-color { display: inline-flex; align-items: center; gap: 6px; }
+.ab-color-lab { font-size: var(--fs-sm); color: var(--text-2); }
+.ab-swatch {
+  -webkit-appearance: none; appearance: none; width: 30px; height: 30px; padding: 0; cursor: pointer;
+  border: 1px solid var(--line); border-radius: var(--r-md); background: none;
+}
+.ab-swatch::-webkit-color-swatch-wrapper { padding: 3px; }
+.ab-swatch::-webkit-color-swatch { border: none; border-radius: var(--r-sm); }
+.ab-swatch:hover { border-color: var(--muted); }
+.ab-hex {
+  width: 76px; height: 30px; box-sizing: border-box; padding: 0 8px; font-family: inherit; font-size: var(--fs-sm);
+  text-transform: lowercase; color: var(--text); background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: var(--r-md); outline: none;
+}
+.ab-hex:focus { border-color: var(--accent); }
+.ab-hex.bad { border-color: var(--warn); }
+/* altura reservada: o aviso aparecer não empurra nada */
+.ab-warn { margin: 0; min-height: 14px; font-size: var(--fs-sm); color: var(--warn); line-height: 14px; }
+
+/* Heróis: gêmeos em cima (sem título) + Variantes (retratos menores); a lista rola dentro da caixa */
+.ab-hlist { flex: 1 1 0; min-height: 0; overflow: auto; scrollbar-gutter: stable; }
+.ab-hgrid { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 12px 10px; align-content: flex-start; }
+.ab-hgrid.sm { gap: 6px; padding-top: 4px; }
+.ab-var { border-top: 1px solid var(--line-soft); margin: 0 12px; padding-top: 6px; }
+.ab-var .ab-hgrid { padding-left: 0; padding-right: 0; }
+.ab-hero { padding: 0; border: none; background: none; border-radius: 50%; cursor: pointer; display: block; }
+.ab-hero .ui-portrait { display: block; }
+.ab-hero:hover .ui-portrait { border-color: var(--accent); }   /* hover = borda, nunca elevação (Bancada Plana) */
+.ab-none { margin: 0; padding: 10px 12px 12px; font-size: var(--fs-md); line-height: 1.4; max-width: 46ch; }
+.ab-none b { color: var(--text); font-weight: 600; }
+
+/* estado vazio: nenhum arquétipo */
+.ab-empty { max-width: 420px; margin: 12vh auto 0; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.ab-empty h2 { margin: 6px 0 0; font-size: var(--fs-xl); }
+.ab-empty p { margin: 0 0 6px; font-size: var(--fs-md); line-height: 1.45; }
+
+/* ================= tela Equipamentos (features/gear) ================= */
+.eq { height: 100%; display: flex; flex-direction: column; gap: 10px; padding: 14px 18px; min-height: 0; }
+.eq-list { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+.eq-empty { padding: 20px 4px; font-size: var(--fs-md); }
+
+/* filtros EM CIMA, num painel: linha 1 = o que escolher por ícone (Peça, Set) + contagem/limpar/up em
+   lote; linha 2 = dropdowns + estado, e o grupo de INTERESSE à direita. Cada linha quebra quando a
+   janela estreita; tudo da linha 2 tem 30px (a altura do dropdown) e centra pela mesma linha */
+.eq-bar {
+  display: flex; flex-direction: column; flex: none;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 0 10px;
+}
+.eq-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; min-width: 0; padding: 8px 0; }
+.eq-row + .eq-row { border-top: 1px solid var(--line-soft); }
+.eq-group { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.eq-dds { gap: 6px; }
+.eq-lab { font-size: var(--fs-xs); font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; }
+.hf-tog.eq-tog { width: 28px; height: 28px; border-radius: var(--r-sm); }
+.eq-row + .eq-row .hf-tog.eq-tog { width: 30px; height: 30px; }
+.eq-dd .ui-dd { width: 128px; justify-content: space-between; }
+.eq-tools { margin-left: auto; display: inline-flex; align-items: center; gap: 10px; }
+.eq-dd.sm .ui-dd { width: 96px; }
+.eq-dd .ui-pop { min-width: 190px; }
+.eq-count { font-size: var(--fs-sm); white-space: nowrap; }
+.ui-btn.eq-clear, .ui-btn.eq-batch { display: inline-flex; align-items: center; gap: 6px; height: 30px; box-sizing: border-box; }
+.eq-batch-n {
+  background: var(--accent); color: var(--ink); border-radius: var(--r-pill);
+  font-size: var(--fs-xs); font-weight: 700; padding: 1px 6px;
+}
+.eq-batch-n.warn { background: var(--warn); }   /* tem up não gravado */
+/* < 1500px (notebook 1366): aperta para cada linha caber numa só (medido: com Máx., Pedra e o rank do corte com × 1334px → cabe em 1306) */
+@media (max-width: 1499px) {
+  .eq-row { column-gap: 12px; }
+  .hf-tog.eq-tog { width: 26px; height: 26px; }
+  .eq-dd .ui-dd { width: 104px; }
+  .eq-dd.sm .ui-dd { width: 80px; }
+  .eq-bar .eq-target .ui-dd { width: 100px; }   /* a regra base vem depois no arquivo */
+  .eq-eval { gap: 6px; }
+  .eq-bar .ui-num.eq-int-num:not(.sm) { width: 44px; }
+  .eq-bar .ui-icut { gap: 3px; }
+  .eq-dds { gap: 5px; }
+}
+/* diálogo do espaço vazio: os filtros sem o painel (o Modal já é a caixa) */
+.sd .eq-bar { background: transparent; border: none; padding: 0; }
+
+/* tabela de peças: ocupa o resto da tela e rola por dentro */
+.it-box { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+.it-scroll { flex: 1 1 0; min-height: 0; max-height: none; }
+.it { font-stretch: var(--stretch-dense); }
+.it-lvl { font-weight: 700; }
+.it-enh { color: var(--text-2); font-weight: 700; }   /* neutro: 400 linhas em azul seria decoração (Regra da Chama Única) */
+.bt-f.it-main { gap: 5px; color: var(--text); }
+.it-mn { color: var(--text-2); }
+.it-mv { margin-left: auto; font-weight: 700; }
+.bt-c.it-none { background: transparent; }
+.it-mod { margin-left: 2px; color: var(--text-2); }
+.bt-f.it-owner { gap: 6px; color: var(--text); }
+.it-free { color: var(--text-3); }
+.it-row:focus-visible { outline-offset: -2px; }
+
+/* lista | painel da peça selecionada (ao lado; abaixo de 1280px desce para baixo da lista) */
+/* tela Equipamentos: lista | painel da peça, em QUATRO jeitos pela largura da janela
+   (o corte de 1860px é o WIDE_MQ do GearScreen.js: o editor embutido precisa de 760px).
+   As colunas de atributo e o Dono da tabela vêm destas variáveis (ItemTable COLS usa var()). */
+.eq-main {
+  --ip-inline-h: 548px;           /* altura do editor embutido FECHADO (medida na sonda) */
+  --eq-table: 1038px;             /* soma das colunas do ItemTable (atributos 40, Dono ≤150) + barra de rolagem */
+  --it-sub: minmax(40px, 52px);   /* MÉDIA: a lista cresce até cobrir a tela… */
+  --it-owner: minmax(96px, 1fr);
+  flex: 1 1 0; min-height: 0; display: grid; gap: 12px;
+  grid-template-columns: minmax(0, 1fr) 300px;   /* …e o painel fica na largura mínima boa */
+}
+.eq-main > .eq-list { min-width: 0; }
+/* MÉDIA: card · Heróis · Arquétipos empilhados; as duas caixas rolam por dentro (Heróis fica com a
+   sobra; Arquétipos, que costuma ser curta, encolhe ao conteúdo até 40%) */
+.eqd { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: hidden; }
+.eqd.empty { align-items: center; justify-content: center; border: 1px dashed var(--line); border-radius: var(--r-lg); font-size: var(--fs-md); }
+.eqd-box { display: flex; flex-direction: column; min-width: 0; min-height: 0; flex: none; }
+.eqd-heroes { flex: 1 1 0; min-height: 110px; }
+.eqd-arch { flex: 0 1 auto; max-height: 40%; min-height: 90px; }
+.eqd-heroes .eqd-list, .eqd-arch .eqd-list { flex: 1 1 auto; min-height: 0; overflow: auto; scrollbar-gutter: stable; }
+/* LARGA: tabela na largura natural, o resto é do painel: editor embutido (altura fixa do editor
+   fechado — o que abrir a mais rola dentro dele) e, embaixo, Heróis | Arquétipos até o fim da tela */
+@media (min-width: 1860px) {
+  .eq-main { --it-sub: 40px; --it-owner: minmax(96px, 150px); grid-template-columns: minmax(0, 1fr) calc(100% - var(--eq-table) - 12px); }
+  .eqw { display: flex; flex-direction: column; gap: 12px; min-height: 0; min-width: 0; }
+  .eqw-empty { height: var(--ip-inline-h); flex: none; display: flex; align-items: center; justify-content: center;
+    border: 1px dashed var(--line); border-radius: var(--r-lg); font-size: var(--fs-md); }
+  .eqd.wide { flex: 1 1 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+  .eqd.wide.empty { display: none; }
+  .eqd.wide .eqd-box { max-height: none; min-height: 0; }
+}
+/* ESTREITA: as três caixas embaixo da lista, altura fixa (vazio ou com peça: a lista não pula) */
+@media (max-width: 1279px) {
+  .eq-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .eqd { height: 262px; }
+  .eqd:not(.empty) { display: grid; grid-template-columns: 250px minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; }
+  .eqd-heroes, .eqd-arch { max-height: none; min-height: 0; }
+}
+/* ESTREITA E BAIXA: só a lista (duplo clique/Enter abrem o popout) */
+@media (max-width: 1279px) and (max-height: 720px) {
+  .eqd { display: none !important; }
+  .eq-main { grid-template-rows: minmax(0, 1fr); }
+}
+.eqd-head { height: 24px; box-sizing: content-box; flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 10px 0; }
+.eqd-head .ui-btn { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; }
+.eqd-card { display: flex; height: 176px; padding: 6px 10px 0; }
+.eqd-card > .gc { flex: 1 1 auto; min-width: 0; }
+.eqd-notes { display: flex; align-items: center; gap: 14px; padding: 8px 10px 10px; font-size: var(--fs-md); flex-wrap: wrap; }
+.eqd-note { display: inline-flex; align-items: center; gap: 5px; min-width: 0; }
+.eqd-cap { font-size: var(--fs-xs); color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eqd-list { padding: 4px 6px 8px; font-size: var(--fs-sm); font-stretch: var(--stretch-dense); }
+
+/* filtro "Para" e o chip "Com perda" (pedra que baixa o potencial da peça de vez) */
+.eq-target .ui-dd { width: 140px; }
+.eq-target .ui-pop { min-width: 220px; }
+.eq-gem .ui-dd { width: 150px; }
+.eq-gem .ui-pop { min-width: 170px; }
+
+/* diálogo do espaço vazio */
+.sd { display: flex; flex-direction: column; gap: 10px; height: min(640px, 70vh); min-height: 0; }
+.sd-table { flex: 1 1 0; }
+.sd-foot { display: flex; align-items: center; gap: 8px; flex: none; }
+.sd-foot .ui-btn { display: inline-flex; align-items: center; gap: 6px; }
+.sd-warn { font-size: var(--fs-sm); color: var(--warn); }
+.sd-warn b { font-weight: 600; }
+
+/* ---- up em lote: grade ---- */
+.ub { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+.ub-bar { display: flex; align-items: center; gap: 10px; flex: none; min-height: 32px; }
+.ub-bar .ui-btn { display: inline-flex; align-items: center; gap: 6px; }
+.ub-title { font-size: var(--fs-xl); }
+.ub-bar .ub-err { max-width: 40%; }
+.ub-err { color: var(--bad); font-size: var(--fs-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+/* Up v2: grade 4×4 (vagas do jogo) | painel da peça selecionada; < 1280 o painel desce */
+.ub-body { flex: 1 1 0; min-height: 0; display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr) 380px; }
+.ub-grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(150px, 1fr)); gap: 8px; min-height: 0; overflow: auto; }
+/* vaga (layout "A + rank do C", 2026-10-02): tudo escala com --ub-k (UpBatch useTileScale: 1 na vaga de 210×115, até 2);
+   tamanhos-base = esboço aprovado ÷ 1,75 (vaga de 1920×1080), sempre com o piso de texto do sistema */
+.ub-slot {
+  --k: var(--ub-k, 1);
+  position: relative; display: grid; align-items: stretch; column-gap: calc(8px * var(--k)); min-width: 0; text-align: left;
+  font: inherit; color: var(--text); background: var(--surface); border: 1.5px solid var(--line); border-radius: 9px;
+  padding: calc(8px * var(--k)) calc(7px * var(--k)); cursor: pointer;
+  font-stretch: var(--stretch-dense); transition: border-color .15s ease, background-color .15s ease;
+}
+.ub-slot:hover { background: var(--surface-2); }
+.ub-slot.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.ub-slot.over { border-style: dashed; border-color: var(--accent); }
+.ub-slot.empty { display: flex; align-items: center; justify-content: center; border-style: dashed; background: transparent; color: var(--text-3); cursor: default; }
+/* esquerda, largura fixa: ícone como no jogo (nível · +N · set) · rank · % · score */
+.ub-s-l { display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-width: 0; }
+.ub-s-ico { position: relative; flex: none; display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  border: 1.5px solid var(--line); border-radius: var(--r-sm); background: var(--surface-2); }
+.ub-s-lvl, .ub-s-plus { position: absolute; font-size: max(var(--fs-xs), calc(6.3px * var(--k))); font-weight: 700; line-height: 1.2; }
+.ub-s-lvl { top: -1px; left: -1px; background: var(--bg); border-radius: var(--r-sm) 0 var(--r-sm) 0; padding: 0 3px; }
+.ub-s-plus { top: calc(-5px * var(--k)); right: calc(-6px * var(--k)); background: var(--enh-badge); color: var(--bg); border-radius: var(--r-pill); padding: 0 4px; }
+.ub-slot.dirty .ub-s-plus { background: var(--warn); }
+.ub-s-set { position: absolute; right: 1px; bottom: 1px; line-height: 0; }
+.ub-s-l .ui-rank.ub-s-rk, .ub-s-rk { font-size: max(18px, calc(19.5px * var(--k))); }
+.ub-s-pct { font-size: max(var(--fs-sm), calc(9.2px * var(--k))); font-weight: 700; }
+.ub-s-score { font-size: max(var(--fs-xs), calc(7.4px * var(--k))); font-weight: 700; color: var(--text-2);
+  border: 1px solid var(--line); border-radius: var(--r-sm); padding: 1px calc(4.5px * var(--k)); }
+/* meio: main + 4 substatus empilhados como no jogo, espalhados na altura; colunas fixas = valores alinhados */
+.ub-s-m { display: flex; flex-direction: column; justify-content: space-evenly; min-width: 0; }
+.ub-s-ln { display: grid; grid-template-columns: auto 3em auto auto; justify-content: start; align-items: center;
+  column-gap: calc(3.5px * var(--k)); font-size: max(var(--fs-sm), calc(8px * var(--k))); color: var(--text-2);
+  border-radius: var(--r-sm); padding: 1px calc(3.5px * var(--k)); margin: 0 calc(-3.5px * var(--k)); white-space: nowrap; overflow: hidden; }
+.ub-s-ln b { color: var(--text); font-weight: 700; }
+.ub-s-ln.main { font-size: max(var(--fs-md), calc(9.7px * var(--k))); }
+.ub-s-gain { color: var(--gain); font-size: max(var(--fs-xs), calc(6.9px * var(--k))); }
+/* a linha que acabou de subir acende e apaga (mesmo tempo do Delta) */
+.ub-s-ln.lit { animation: ub-flash calc(var(--chg-ms) * 1ms) ease-out forwards; }
+.ub-s-ln.lit b { animation: ub-flash-v calc(var(--chg-ms) * 1ms) ease-out forwards; }
+@keyframes ub-flash { 0%, 30% { background-color: var(--up-flash); box-shadow: inset 3px 0 0 var(--ok); } 100% { background-color: transparent; box-shadow: inset 3px 0 0 transparent; } }
+@keyframes ub-flash-v { 0%, 30% { color: var(--ok); } 100% { color: var(--text); } }
+@media (prefers-reduced-motion: reduce) { .ub-s-ln.lit, .ub-s-ln.lit b { animation: none; } }
+/* direita: sugestão · curva · mudança da nota; interessados no canto */
+.ub-s-r { display: flex; flex-direction: column; justify-content: space-between; align-items: stretch; min-width: 0;
+  padding-bottom: max(20px, calc(14px * var(--k))); }
+.ub-s-r .ub-spark { align-self: center; }
+/* caixinha da sugestão do sistema (upar · parar · vender): reservada; "—" até a regra existir */
+.ub-s-sug { display: flex; align-items: center; justify-content: center; height: max(20px, calc(13.7px * var(--k))); box-sizing: border-box;
+  border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface-2); color: var(--text-3);
+  font-size: max(var(--fs-xs), calc(6.9px * var(--k))); font-weight: 700; }
+.ub-s-delta { display: flex; align-items: center; justify-content: center; gap: calc(3px * var(--k)); white-space: nowrap; overflow: hidden;
+  font-size: max(var(--fs-xs), calc(6.9px * var(--k))); color: var(--text-2); min-height: 1.2em; }
+.ub-s-delta .ui-rank { font-size: inherit; }
+.ub-s-who { position: absolute; right: calc(5px * var(--k)); bottom: calc(5px * var(--k)); }
+.ub-s-nok { min-width: max(18px, calc(12.6px * var(--k))); height: max(18px, calc(12.6px * var(--k))); font-size: max(var(--fs-xs), calc(6.3px * var(--k))); }
+.ub-trend { font-size: var(--fs-sm); }
+.ub-trend.up { color: var(--ok); }
+.ub-trend.down { color: var(--bad); }
+.ub-spark { flex: none; display: block; }
+.ub-spark.empty { height: 1px; }
+.ub-spark-line { stroke: var(--accent); stroke-width: 1.6; }
+.ub-spark-ref { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 3; }
+.ub-spark-dot { fill: var(--accent); }
+.ub-detail { min-height: 0; overflow: auto; scrollbar-gutter: stable; display: flex; flex-direction: column; gap: 10px; }
+.ub-detail.empty { align-items: center; justify-content: center; text-align: center; padding: 20px; border: 1px dashed var(--line); border-radius: 9px; }
+.ub-box { background: var(--surface); border: 1px solid var(--line); border-radius: 9px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+.ub-h { margin: 0; font-size: var(--fs-sm); font-weight: 700; color: var(--text-2); }
+.ub-levels { display: grid; gap: 4px; font-size: var(--fs-sm); }
+.ub-lv { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+.ub-lv-r { display: inline-flex; align-items: center; gap: 3px; }
+/* botão de roll colorido pelo efeito (painel da peça) */
+.ip-upv.gain { border-color: var(--ok); color: var(--ok); }
+.ip-upv.loss { border-color: var(--bad-border); color: var(--bad); }
+@media (max-width: 1279px) {
+  .ub-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: max-content max-content; overflow: auto; }
+  .ub-detail, .ub-grid4 { overflow: visible; }
+}
+.ub-card {
+  display: flex; flex-direction: column; gap: 6px; min-width: 0;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 9px; padding: 7px 8px 6px;
+  font-stretch: var(--stretch-dense);
+}
+.ub-card.done { border-style: dashed; }   /* sem opacidade: o texto continua legível */
+.ub-card.err { box-shadow: 0 0 0 1px var(--bad); }
+.ub-head { display: flex; align-items: center; gap: 6px; }
+.ub-head .ui-iconbtn { width: 24px; height: 22px; }
+.ub-lvl { font-size: var(--fs-sm); font-weight: 700; }
+.ub-enh { font-size: var(--fs-lg); font-weight: 700; color: var(--text); }
+.ub-next { color: var(--text-2); }   /* informação, não ação: sem accent */
+.ub-card.dirty .ub-enh { color: var(--warn); }
+.ub-main { display: flex; align-items: center; gap: 6px; font-size: var(--fs-md); padding: 4px 0; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); }
+.ub-mn { color: var(--text-2); }
+.ub-m15 { color: var(--text-2); }
+.ub-rows { display: flex; flex-direction: column; gap: 2px; }
+.ub-row { display: grid; grid-template-columns: 62px 40px 26px minmax(0, 1fr); align-items: center; gap: 4px; min-height: 30px; font-size: var(--fs-sm); }
+.ub-sn { display: inline-flex; align-items: center; gap: 4px; color: var(--text-2); min-width: 0; }
+.ub-sv { text-align: right; font-weight: 700; }
+.ub-vals { display: flex; justify-content: flex-end; gap: 4px; flex-wrap: nowrap; }
+.ip-upv.ub-v { min-width: 30px; height: 26px; }
+.ub-row.new { grid-template-columns: 96px 0 0 minmax(0, 1fr); }
+.ub-row.new .ui-dd-wrap, .ub-row.new .ui-dd { width: 100%; }
+.ub-foot { display: flex; align-items: center; min-height: 18px; font-size: var(--fs-xs); border-top: 1px solid var(--line-soft); padding-top: 5px; }
+
+/* ---- notas da peça (E3): score do jogo · rank · potencial · interessados ---- */
+.bt-f.it-score { color: var(--text-2); gap: 4px; justify-content: flex-end; }
+.it-proj { font-size: var(--fs-xs); color: var(--text-3); display: inline-flex; align-items: center; gap: 2px; margin-left: 3px; }   /* score se reforjar: informação, não ação */
+.bt-f.it-rank { justify-content: center; }
+.bt-f.it-pot { color: var(--text); }
+.bt-f.it-int { justify-content: center; }
+/* roll raro (velocidade 5 na 85): borda tracejada, fora da faixa normal */
+.ip-upv.rare { border-style: dashed; }
+
+/* ---- corte de interesse (Equipamentos, arquétipo, herói) ---- */
+.eq-int { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.eq-int-lab { font-size: var(--fs-xs); color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; }
+.ui-num.eq-int-num { width: 52px; text-align: right; }
+/* corte de interesse: rank ⇄ número (components/InterestCut) */
+.ui-icut { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.ui-icut .ui-num.eq-int-num, .ui-num.eq-int-num.sm { height: 30px; box-sizing: border-box; border-radius: var(--r-md); }
+.ui-num.eq-int-num.sm { width: 40px; }
+/* numa linha de campo (caixa Personagem do Otimizador, editor de arquétipo): o rank estica como os
+   dropdowns das outras linhas e o número fica na ponta, na mesma altura */
+.op-grow .ui-icut { flex: 1 1 auto; min-width: 0; }
+.op-grow .ui-icut-rank { flex: 1 1 auto; min-width: 0; display: flex; }
+.op-grow .ui-icut-rank .ui-dd-wrap, .op-grow .ui-icut-rank .ui-dd { width: 100%; }
+.ui-icut-rank .ui-dd { width: 78px; justify-content: space-between; }   /* cabe "SSS+" + × (medido 75) */
+.ui-icut-rank .ui-dd .ellipsis:not(.muted) { display: none; }   /* fechado: só a letra (o número está ao lado); a lista aberta mostra "≥82" */
+.ui-icut-rank .ui-pop { min-width: 110px; }
+
+/* ---- interessados: contador na célula Arq. e o cartão flutuante ---- */
+.ui-hovercard-anchor { display: inline-flex; align-items: center; gap: 5px; min-width: 0; }
+.ui-hovercard-anchor:focus-visible { border-radius: var(--r-sm); }
+.it-nok {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; box-sizing: border-box;
+  font-size: var(--fs-xs); font-weight: 700; color: var(--text); line-height: 1;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-pill); padding: 0 5px;
+}
+.it-nok.zero { color: var(--text-3); background: transparent; }
+.ui-hovercard { position: fixed; z-index: 200; pointer-events: none; max-height: none; overflow: visible; padding: 8px 10px; width: 300px; box-shadow: var(--shadow-pop); }
+.ic { display: flex; flex-direction: column; gap: 4px; font-size: var(--fs-sm); font-stretch: var(--stretch-dense); }
+.ic-head { display: flex; align-items: center; gap: 6px; padding-bottom: 6px; border-bottom: 1px solid var(--line-soft); }
+.ic-cap { font-size: var(--fs-xs); color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; }
+.ic-sec { margin-top: 4px; font-size: var(--fs-xs); color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; }
+.ic-row { display: grid; grid-template-columns: 20px minmax(0, 1fr) 30px 36px 30px; align-items: center; gap: 6px; min-height: 24px; }
+.ic-row.tr { grid-template-columns: 20px minmax(0, 1fr) 30px 36px 12px 30px; }   /* com ▲▼ do último up (up em lote) */
+.ub-detail .ic-sec, .ub-detail .ic-min { font-size: var(--fs-sm); }   /* texto funcional do painel do lote: piso 11px */
+.ic-row .ui-rank, .ic-row .ui-delta:nth-child(3) { justify-self: center; }
+.ic-list { display: flex; flex-direction: column; gap: 1px; }
+/* no painel da peça a linha é botão: leva ao Otimizador do herói / ao arquétipo */
+button.ic-row { width: 100%; padding: 2px 4px; border: 0; border-radius: var(--r-sm); background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; min-height: 28px; }
+button.ic-row:hover { background: var(--surface-2); }
+button.ic-row.on { background: var(--accent-weak); }
+button.ic-row:focus-visible { outline-offset: -2px; }
+.ic-row.below .ic-name, .ic-row.below .ic-pct { color: var(--text-2); }
+.ic-name { color: var(--text); }
+.ic-extra { color: var(--text-3); }
+.ic-pct { text-align: right; }
+.ic-min { text-align: right; font-size: var(--fs-xs); color: var(--text-3); }
+.ic-none { color: var(--text-2); padding: 2px 0; }
+
+/* ================= tela Cobertura (features/coverage) ================= */
+/* mesma casca da tela Equipamentos (.eq, .eq-bar, .bt-*, .eqd-*): tabela | detalhe 360px; < 1280 o detalhe desce */
+.cv-main { grid-template-columns: minmax(0, 1fr) 360px; }
+.cv { font-stretch: var(--stretch-dense); }
+.bt-f.cv-type { gap: 8px; color: var(--text); }
+.cv-icons { display: inline-flex; align-items: center; gap: 3px; flex: none; }
+.cv-strong { color: var(--text); font-weight: 700; }
+.bt-f.cv-cover { gap: 5px; padding: 0 6px; }
+.cv-grade { display: inline-flex; align-items: center; gap: 4px; }
+.cv-none { padding: 10px 12px; }
+.cv-cover .ui-qbar { width: 36px; height: 7px; flex: none; }
+.cv-who { display: inline-flex; align-items: center; gap: 3px; min-width: 0; }
+.cv-more { font-size: var(--fs-xs); color: var(--text-2); margin-left: 2px; }
+.cv-served { display: inline-flex; align-items: baseline; gap: 4px; font-size: var(--fs-md); white-space: nowrap; }
+.cv-served .eq-lab { margin-right: 2px; }
+
+/* detalhe: tipo + números + funil (fixo) · quem pede (encolhe até 40%) · perto da régua (o resto) */
+.cvd .cvd-type { flex: none; }
+.cvd-head { gap: 8px; }
+.cvd-title { font-size: var(--fs-lg); font-weight: 600; color: var(--text); min-width: 0; }
+/* números do tipo: grade 3 × 2, rótulo em cima e valor embaixo (as colunas alinham) */
+.cvd-nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 12px; padding: 6px 10px 10px; }
+.cvd-num { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.cvd-v { display: inline-flex; align-items: center; gap: 6px; height: 20px; font-size: var(--fs-lg); color: var(--text); }
+.cvd-v .ui-qbar { width: 40px; height: 7px; flex: none; }
+.cvd.compact .cvd-type { flex: 1 1 0; min-height: 0; }   /* bloco de um perfil: só esta caixa, na altura da tabela */
+.cvd .cvd-who { flex: 0 1 auto; max-height: 40%; min-height: 90px; }
+.cvd .cvd-near { flex: 1 1 0; min-height: 110px; }
+.cvd-who .eqd-list, .cvd-near .eqd-list { flex: 1 1 auto; min-height: 0; overflow: auto; scrollbar-gutter: stable; }
+.cv-funnel { display: flex; flex-direction: column; gap: 4px; padding: 6px 10px 10px; font-stretch: var(--stretch-dense); }
+.cv-stage { display: grid; grid-template-columns: 108px minmax(0, 1fr) 40px; align-items: center; gap: 8px; height: 20px; }
+.cv-stage-l { display: inline-flex; align-items: center; gap: 5px; font-size: var(--fs-sm); color: var(--text-2); white-space: nowrap; overflow: hidden; }
+.cv-stage-bar { height: 7px; border-radius: var(--r-pill); background: var(--line-soft); overflow: hidden; }
+.cv-stage-bar > span { display: block; height: 100%; background: var(--text-3); border-radius: var(--r-pill); }
+.cv-stage > .ui-delta, .cv-stage > b { justify-self: end; font-size: var(--fs-md); }
+.cv-stage.drop .cv-stage-l, .cv-stage.drop b { color: var(--bad); }
+.cv-stage.drop .cv-stage-bar > span { background: var(--bad); }
+/* linhas de "quem pede" e "perto da régua": botão inteiro (abre), mesmo hover das listas de interessados */
+.cv-line {
+  display: grid; align-items: center; gap: 6px; width: 100%; min-height: 28px; padding: 2px 4px;
+  border: 0; border-radius: var(--r-sm); background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer;
+  grid-template-columns: 20px minmax(0, 1fr) 58px 78px 26px;
+}
+.cv-line:hover { background: var(--surface-2); }
+.cv-line:focus-visible { outline-offset: -2px; }
+.cv-name { color: var(--text); min-width: 0; }
+.cv-extra { color: var(--text-3); }
+.cv-cut { display: inline-flex; align-items: center; gap: 4px; color: var(--text-2); }
+.cv-gem { font-size: var(--fs-xs); color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cv-gem.inh { color: var(--text-3); }
+.cv-n { justify-self: end; color: var(--text); }
+.cv-line.cv-near { grid-template-columns: 18px 15px 58px 16px 30px minmax(0, 1fr); }
+.cv-near .cv-mainstat { display: inline-flex; align-items: center; gap: 3px; color: var(--text); }
+.cv-gap { justify-self: end; color: var(--text); white-space: nowrap; }
+/* aba Perfis: matriz perfil × 6 peças (fundo = válidas ÷ heróis no mesmo calor das tabelas) + régua e pedra */
+.cvp-row { min-height: 38px; }
+.cvp-row > .bt-f, .cvp-row > .bt-c { min-height: 38px; }
+.bt-f.cvp-who { gap: 8px; color: var(--text); font-weight: 600; }
+button.cvp-cell { border: 0; background: transparent; color: var(--text); font: inherit; cursor: pointer; padding: 0; }
+button.cvp-cell:hover { filter: brightness(1.25); }
+button.cvp-cell:focus-visible { outline-offset: -2px; }
+.cvp-cut, .cvp-gem { padding: 0 6px; }
+.cvp-cut .ui-icut { gap: 4px; }
+.cvp-gem .ui-dd { width: 128px; }
+/* alteração do simulador ainda não aplicada: borda em Amarelo Atenção no controle */
+.pend .ui-dd, .pend .ui-num, .cv-pend .ui-dd, .cv-pend .ui-num { border-color: var(--warn); }
+.ui-btn.accent .cv-n-pend { background: var(--ink); color: var(--accent); margin-left: 6px; }
+.cv-seg .ui-seg-opt { height: 28px; padding: 0 10px; font-size: var(--fs-sm); }
+/* bloco de UM perfil (editor de arquétipo; aba Cobertura do herói): cabeçalho + tabela | detalhe */
+.cvs { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.cvs-head { min-height: 30px; display: flex; align-items: center; gap: 12px; flex: none; }
+/* Atendidos colado no título, separado por um fio (não solto no canto) */
+.cvs-att { display: inline-flex; align-items: baseline; gap: 5px; padding-left: 12px; border-left: 1px solid var(--line); font-size: var(--fs-lg); color: var(--text); }
+.cvs-att-l { font-size: var(--fs-sm); color: var(--text-2); }
+.cvs-att-of { font-size: var(--fs-sm); color: var(--text-3); }
+.cvs-via { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); font-size: var(--fs-md); }
+.cvs-main { flex: 1 1 0; min-height: 0; }
+.cvs .cv-main { grid-template-columns: minmax(0, 1fr) 300px; }   /* detalhe compacto: só números + funil */
+@media (max-width: 1499px) { .cvs .cv-main { grid-template-columns: minmax(0, 1fr) 260px; } }
+.ab-cov { flex: 1 1 0; min-height: 300px; }            /* no editor de arquétipo: o resto da tela; abaixo disso a tela rola */
+.tab-body > .cvs-hero { flex: 1 1 0; min-height: 0; }  /* aba do herói: ocupa o resto da tela, como as listas */
+.cvs-empty { padding: 20px 4px; font-size: var(--fs-md); }
+/* Otimizador do herói: atribuído a um arquétipo mas diferente dele */
+.op-diff { display: inline-flex; align-items: center; color: var(--warn); flex: none; margin-left: 6px; }
+@media (max-width: 1279px) {
+  .cv-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .cvd { height: 300px; }
+  .cvd:not(.compact) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cvd .cvd-who, .cvd .cvd-near { max-height: none; min-height: 0; }
+}

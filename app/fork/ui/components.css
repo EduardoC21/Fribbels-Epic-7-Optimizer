@@ -1,0 +1,316 @@
+/*
+ * components.css — estilo da biblioteca de componentes burros (ui/components/*.js).
+ * Regra: só usa var(--token). Nada de hex solto aqui.
+ */
+
+/* ---------------- Box / Panel ---------------- */
+.ui-box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); }
+.ui-box.flush { padding: 0; overflow: hidden; }
+.ui-box.pad { padding: 12px; }
+
+/*
+ * Alinhamento óptico ícone+texto: a caixa de linha padrão é mais alta que os
+ * glifos (sobra espaço de descendente embaixo), o que empurra o texto para
+ * cima em relação ao ícone. line-height:1 faz a caixa abraçar o glifo.
+ * A arte dos ícones do jogo está centrada (conferido no alpha bbox), então
+ * este é o ajuste certo — não mexer na imagem.
+ */
+.ui-btn, .ui-chip, .ui-dd, .ui-opt, .ui-statrow, .ui-rank { line-height: 1; }
+
+/* glifos SVG: block evita o espaço de baseline que o inline cria */
+.ui-glyph { display: block; flex: none; }
+
+/* ---------------- Button ---------------- */
+.ui-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border: 1px solid var(--line); border-radius: var(--r-pill);
+  padding: 6px 12px; font-size: var(--fs-md);
+  background: var(--surface-2); color: var(--text-2);
+  cursor: pointer; white-space: nowrap;
+}
+.ui-btn:hover { color: var(--text); border-color: var(--muted); }
+.ui-btn[disabled] { opacity: .45; cursor: not-allowed; }
+.ui-btn.accent { background: var(--accent); color: var(--ink); border-color: var(--accent); font-weight: 600; }
+.ui-btn.accent:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: var(--ink); }
+.ui-btn.active { background: var(--text); color: var(--ink); border-color: var(--text); }
+.ui-btn.ghost { background: transparent; }
+.ui-btn.sq { border-radius: var(--r-md); }
+
+.ui-iconbtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 22px; flex: none;
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface-2); color: var(--text-2); cursor: pointer;
+}
+.ui-iconbtn:hover { border-color: var(--accent); color: var(--accent); }
+.ui-iconbtn.on { background: var(--accent); color: var(--ink); border-color: var(--accent); }
+
+/* ---------------- Tabs ---------------- */
+.ui-tabs { display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+
+/* ---------------- Dropdown ---------------- */
+.ui-dd-wrap { position: relative; display: inline-block; }
+.ui-dd {
+  display: inline-flex; align-items: center; gap: 7px;
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  padding: 6px 10px; font-size: var(--fs-sm);
+  background: var(--surface-2); color: var(--text); cursor: pointer; white-space: nowrap;
+}
+/* nunca vaza do espaço que tem: texto longo vira reticências (o title mostra tudo) */
+.ui-dd { max-width: 100%; min-width: 0; overflow: hidden; }
+/* ALTURA FIXA em todo o projeto: ícone do jogo (stat, set, peça) não estica a
+   caixa — o ícone fica do tamanho dele, centrado, e a caixa não muda */
+.ui-dd { height: 30px; box-sizing: border-box; padding-top: 0; padding-bottom: 0; }
+.ui-dd .contents, .ui-dd .ellipsis { line-height: 1; }
+.ui-dd .ui-ico, .ui-dd img, .ui-dd svg { flex: none; }
+.ui-dd .ellipsis { min-width: 0; }
+.ui-dd:hover { border-color: var(--muted); }
+.ui-dd.open { border-color: var(--accent); }
+.ui-dd.filled { border-color: var(--accent); background: var(--accent-weak); }
+.ui-dd .caret { color: var(--text-2); }
+.ui-dd .count {
+  background: var(--accent); color: var(--ink); border-radius: var(--r-pill);
+  font-size: var(--fs-xs); padding: 0 5px; font-weight: 700;
+}
+/* × de limpar: no lugar da setinha, só com algo escolhido. A setinha sai e a vaga do × fica reservada
+   (padding), para o conteúdo — inclusive selo que não encolhe, como o rank — nunca ficar embaixo dele */
+.ui-dd-wrap.clearable .ui-dd .caret { display: none; }
+.ui-dd-wrap.clearable .ui-dd { padding-right: 28px; }
+.ui-dd-x {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; padding: 0; border: none; border-radius: var(--r-pill);
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; color: var(--text-2); cursor: pointer;
+}
+.ui-dd-x:hover { background: var(--surface-2); color: var(--text); }
+/* busca no topo da lista: presa, só as opções rolam */
+.ui-pop-q { position: sticky; top: -5px; z-index: 1; width: 100%; box-sizing: border-box; margin-bottom: 4px; text-align: left; }
+.ui-pop-none { padding: 6px 7px; font-size: var(--fs-sm); color: var(--text-3); }
+.ui-pop {
+  position: absolute; top: calc(100% + 4px); left: 0; z-index: 40;
+  min-width: 190px; max-height: 260px; overflow-y: auto;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+  box-shadow: var(--shadow-pop); padding: 5px;
+}
+.ui-opt {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 6px 7px; border-radius: 6px; font-size: var(--fs-sm);
+  color: var(--text); background: transparent; border: none; cursor: pointer; text-align: left;
+}
+.ui-opt:hover, .ui-opt.act { background: var(--surface-2); }
+
+/* ---------------- Dica (ui/tooltip.js: todo `title` do app) ---------------- */
+/* flutua como o dropdown aberto (sombra de popover); curta, largura máxima de leitura */
+.ui-tip {
+  position: fixed; z-index: 90; pointer-events: none;
+  max-width: 280px; padding: 6px 9px;
+  background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: var(--r-md);
+  box-shadow: var(--shadow-pop);
+  font-size: var(--fs-sm); line-height: 1.4; white-space: pre-line; overflow-wrap: break-word;
+  animation: ui-tip-in 120ms ease-out;
+}
+.ui-tip[hidden] { display: none; }
+@keyframes ui-tip-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ui-tip { animation: none; } }
+
+/* ---------------- Menu (clique direito / "⋯") ---------------- */
+.ui-menu { position: fixed; min-width: 180px; max-height: none; }
+.ui-menu .ui-opt { font-size: var(--fs-md); }
+.ui-menu-h { padding: 8px 7px 4px; font-size: var(--fs-xs); font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; }
+.ui-menu-h:not(:first-child) { margin-top: 4px; border-top: 1px solid var(--line-soft); }
+.ui-menu-chk { width: 14px; flex: none; display: inline-flex; color: var(--accent); }
+.ui-menu .ui-opt .ui-glyph { color: var(--text-2); flex: none; }
+.ui-menu .ui-opt:focus-visible { outline: none; background: var(--surface-2); }
+.ui-menu .ui-opt.danger, .ui-menu .ui-opt.danger .ui-glyph { color: var(--bad); }
+.ui-menu .ui-opt[disabled] { opacity: .45; cursor: not-allowed; background: transparent; }
+.ui-menubtn {
+  width: 28px; height: 24px; display: inline-flex; align-items: center; justify-content: center; flex: none;
+  border: 1px solid var(--line); border-radius: 7px; background: var(--surface-2); color: var(--text-2); cursor: pointer; padding: 0;
+}
+.ui-menubtn:hover, .ui-menubtn.open { color: var(--text); border-color: var(--muted); }
+
+/* ---------------- Chip ---------------- */
+.ui-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: 1px solid var(--line); border-radius: var(--r-pill);
+  padding: 4px 10px; font-size: var(--fs-sm);
+  color: var(--text-2); background: var(--surface-2); cursor: pointer; white-space: nowrap;
+}
+.ui-chip:hover { color: var(--text); }
+.ui-chip.on { background: var(--accent-weak); color: var(--text); border-color: var(--accent); }
+.ui-chip.static { cursor: default; }
+
+/* ---------------- Checkbox ---------------- */
+.ui-chk {
+  width: 16px; height: 16px; flex: none;
+  border: 1.5px solid var(--text-3); border-radius: var(--r-sm);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: transparent; background: transparent; cursor: pointer; padding: 0;
+}
+.ui-chk:hover { border-color: var(--accent); }
+.ui-chk.on { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+
+/* ---------------- NumberField ---------------- */
+.ui-num {
+  border: 1px solid var(--line); border-radius: 6px;
+  padding: 4px 6px; font-size: var(--fs-sm); text-align: center;
+  background: var(--surface-2); color: var(--text);
+  font-variant-numeric: tabular-nums; width: 100%; min-width: 0;
+}
+.ui-num::placeholder { color: var(--text-3); }
+.ui-num:disabled { opacity: .45; cursor: not-allowed; }
+.ui-num:focus { outline: none; border-color: var(--accent); }
+/* sem setinhas nativas: o controle é o teclado ou as setas do componente */
+.ui-num::-webkit-outer-spin-button,
+.ui-num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.ui-num[type=number] { -moz-appearance: textfield; }
+
+.ui-stepper { display: inline-flex; align-items: center; gap: 6px; }
+.ui-stepper .arw { display: inline-flex; align-items: center; color: var(--text-2); cursor: pointer; background: none; border: none; padding: 0 2px; }
+.ui-stepper .arw:hover { color: var(--text); }
+.ui-stepper .ui-num { width: 46px; }
+
+/* ---------------- Bars ---------------- */
+.ui-pbar { position: relative; height: 7px; border-radius: 4px; background: var(--line); width: 100%; }
+.ui-pbar .ghost { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: var(--accent-border); }
+.ui-pbar .fill  { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: var(--accent); }
+.ui-pbar .knob  { position: absolute; top: -3.5px; width: 13px; height: 13px; border-radius: 50%; background: var(--accent); transform: translateX(-50%); }
+.ui-pbar.editable { cursor: pointer; user-select: none; }
+.ui-pbar.editable:focus { outline: none; }
+.ui-pbar.editable:focus .knob { box-shadow: 0 0 0 3px var(--accent-weak); }
+/* pontos onde a barra pode parar */
+.ui-pbar .tick { position: absolute; top: 2px; width: 3px; height: 3px; border-radius: 50%; background: var(--surface); opacity: .8; transform: translateX(-50%); pointer-events: none; }
+/* o ponto ORIGINAL (arquétipo): risco por cima da barra, visível mesmo com ela passando */
+.ui-pbar .mark { position: absolute; top: -4px; bottom: -4px; width: 2px; border-radius: 1px; background: var(--text); opacity: .85; transform: translateX(-50%); pointer-events: none; z-index: 1; }
+.ui-pbar .knob { z-index: 2; }
+
+.ui-qbar { height: 9px; border-radius: 5px; background: var(--line); overflow: hidden; width: 100%; }
+.ui-qbar > span { display: block; height: 100%; border-radius: 5px; }
+
+/* ---------------- RankBadge ---------------- */
+.ui-delta { display: inline-flex; align-items: center; gap: inherit; }
+.ui-rank { font-size: var(--fs-lg); font-weight: 800; letter-spacing: .3px; line-height: 1; }
+.ui-rank.holo {
+  background: var(--rank-sss-plus);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 0 8px var(--rank-sss-plus-glow);
+}
+
+/* ---------------- StatRow ---------------- */
+.ui-statrow { font-stretch: var(--stretch-dense); display: flex; align-items: center; gap: 7px; font-size: var(--fs-md); }
+.ui-statrow .nm { color: var(--text-2); display: flex; align-items: center; gap: 7px; min-width: 0; }
+.ui-statrow .val { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 600; }
+
+/* ---------------- Icon ---------------- */
+.ui-ico { display: inline-block; flex: none; object-fit: contain; }
+.ui-ico.ph { background: var(--line); border-radius: 3px; }   /* placeholder quando falta o asset */
+.ui-ico.round, .ui-ico.round.ph { border-radius: 50%; }
+
+/* estrelas de raridade — neutras (como o asset do jogo), nunca douradas */
+.ui-stars { display: inline-flex; gap: 1px; }
+.ui-stars i {
+  background: var(--star); display: inline-block;
+  clip-path: polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+}
+/* retrato do herói: redondo com borda escura para descolar do fundo */
+.ui-portrait { border: 2px solid var(--portrait-ring); }
+
+/* ---------------- Scrollable ----------------
+ * Barra discreta, com setinhas nas duas pontas. Em repouso ela fica APAGADA
+ * (nunca desaparece — some seria perder a referência de onde se está) e
+ * acende por fade quando o mouse entra no painel ou enquanto se rola; volta a
+ * apagar ~0,8s depois que a rolagem para. A classe .is-scrolling é posta e
+ * tirada por ui/components/Scroll.js.
+ * Exceção consciente à regra "só var(--token)": o desenho das setas é um
+ * data-URI e SVG embutido não enxerga variável CSS, então a cor vai em hex
+ * (#6e685f = --muted, #a8a199 = --text-2).
+ */
+.ui-scroll { overflow: auto; }
+.ui-scroll.x { overflow-x: auto; overflow-y: hidden; }
+
+.ui-scroll::-webkit-scrollbar { width: 11px; height: 11px; }
+.ui-scroll::-webkit-scrollbar-track { background: transparent; }
+
+.ui-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--line);          /* em repouso fica APAGADA, nunca some */
+  border: 3px solid transparent;          /* afina sem pintar borda */
+  background-clip: padding-box;
+  border-radius: var(--r-pill);
+  transition: background-color .25s ease;
+}
+.ui-scroll:hover::-webkit-scrollbar-thumb,
+.ui-scroll.is-scrolling::-webkit-scrollbar-thumb { background-color: var(--muted); }
+.ui-scroll::-webkit-scrollbar-thumb:hover { background-color: var(--text-2); }
+
+/* setas nas extremidades — só as das pontas (single-button) */
+.ui-scroll::-webkit-scrollbar-button { display: none; }
+.ui-scroll::-webkit-scrollbar-button:single-button {
+  display: block; height: 11px; width: 11px;
+  background-repeat: no-repeat; background-position: center;
+  background-size: 9px 9px;
+  opacity: .35; transition: opacity .25s ease;   /* apagadas em repouso, não invisíveis */
+}
+.ui-scroll:hover::-webkit-scrollbar-button:single-button,
+.ui-scroll.is-scrolling::-webkit-scrollbar-button:single-button { opacity: 1; }
+
+.ui-scroll::-webkit-scrollbar-button:single-button:vertical:decrement {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2.2 6.2 5 3.4l2.8 2.8' fill='none' stroke='%236e685f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.ui-scroll::-webkit-scrollbar-button:single-button:vertical:increment {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2.2 3.8 5 6.6l2.8-2.8' fill='none' stroke='%236e685f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.ui-scroll::-webkit-scrollbar-button:single-button:horizontal:decrement {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M6.2 2.2 3.4 5l2.8 2.8' fill='none' stroke='%236e685f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.ui-scroll::-webkit-scrollbar-button:single-button:horizontal:increment {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M3.8 2.2 6.6 5l-2.8 2.8' fill='none' stroke='%236e685f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+/* a seta acende junto com o polegar quando o mouse está nela */
+.ui-scroll::-webkit-scrollbar-button:single-button:hover {
+  background-color: var(--surface-2);
+}
+
+/* ---------------- Segmented ---------------- */
+.ui-seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; flex: none; }
+.ui-seg-opt {
+  background: transparent; border: none; color: var(--text-2); cursor: pointer;
+  font-size: var(--fs-sm); padding: 3px 9px; line-height: 1.2;
+}
+.ui-seg-opt + .ui-seg-opt { border-left: 1px solid var(--line); }
+.ui-seg-opt:hover { color: var(--text); }
+.ui-seg-opt.on { background: var(--text); color: var(--ink); }
+
+/* ---------------- Modal ---------------- */
+.ui-modal-back {
+  position: fixed; inset: 0; background: var(--scrim);
+  display: flex; align-items: center; justify-content: center; z-index: 100;
+}
+.ui-modal {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+  min-width: 380px; max-width: 90vw; max-height: 86vh; display: flex; flex-direction: column;
+  box-shadow: var(--shadow-modal);
+}
+.ui-modal-hdr { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.ui-modal-hdr h2 { margin: 0; font-size: var(--fs-xl); }
+.ui-modal-x { margin-left: auto; display: inline-flex; align-items: center; background: none; border: none; color: var(--text-2); cursor: pointer; }
+.ui-modal-x:hover { color: var(--text); }
+.ui-modal-body { padding: 14px; overflow: auto; }
+/* o foco entra no diálogo ao abrir (useDialogFocus): o contêiner não precisa de anel */
+.ui-modal:focus, .ip:focus { outline: none; }
+
+/* ---------------- GameGlyph (símbolo do jogo em máscara) ---------------- */
+.ui-gg {
+  display: inline-block; flex: none; vertical-align: -0.12em; background-color: currentColor;
+  -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; -webkit-mask-size: contain;
+}
+
+/* ---------------- Collapse ---------------- */
+/* altura animada por JS (Collapse.js, MS = 220); aberto = altura automática e nada cortado */
+.ui-collapse { overflow: hidden; transition: height .22s cubic-bezier(.2, 0, 0, 1); }
+.ui-collapse.open { overflow: visible; transition: none; }
+@media (prefers-reduced-motion: reduce) { .ui-collapse { transition: none; } }
+
+/* ---------------- ArchetypeSymbol ---------------- */
+/* círculo do arquétipo: o mesmo anel preto do retrato de herói (é um "retrato" de arquétipo) */
+.ui-asym { display: block; flex: none; overflow: visible; }
+.ui-asym-bg { stroke: var(--portrait-ring); stroke-width: 3; }

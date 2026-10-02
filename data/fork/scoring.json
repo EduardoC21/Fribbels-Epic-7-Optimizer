@@ -1,0 +1,96 @@
+{
+  "_comment": "Pesos e limiares do sistema de POTENCIAL & UTILIDADE de peças (feature D/E). Centralizado para ajuste fácil. Objetivo: economizar recurso — só upar/manter peça que serve a algum herói relevante e que a conta ainda precisa; parar o up e vender quando deixar de compensar. Regras de jogo em .claude-notes/16.",
+  "version": 2,
+  "potentialWeights": {
+    "_desc": "Como compor o % de potencial/utilidade de uma peça (soma ~1.0).",
+    "rollQuality": 0.3,
+    "heroFit": 0.45,
+    "accountCoverage": 0.25
+  },
+  "statScarcityMultiplier": {
+    "_desc": "Multiplicador de valor por escassez do stat (além do gear score). Speed é o mais valioso/escasso.",
+    "Speed": 1.6,
+    "CriticalHitChancePercent": 1.15,
+    "CriticalHitDamagePercent": 1.1,
+    "default": 1.0
+  },
+  "heroFit": {
+    "_desc": "Serventia: a peça casa com o que algum herói RELEVANTE quer. Stat que ninguém prioriza vira desperdício (mesmo com gear score alto).",
+    "usefulStatPriorityMin": 3,
+    "wastePenaltyPerRoll": 0.5,
+    "setPolicy": {
+      "_desc": "SET no NÍVEL DO HERÓI é quase indispensável (peça fora do set que o herói realmente usa raramente serve) — EXCETO peças de muita velocidade p/ heróis speed-flex. MAS o SET no NÍVEL DO ARQUÉTIPO é apenas SUGESTÃO (combos comuns dos heróis daquele arquétipo): serve p/ dar base ao herói e p/ dizer se uma peça é útil PARA O ARQUÉTIPO — NÃO limita os sets dos heróis. O que define o arquétipo são as ESTATÍSTICAS (prioridades), não os sets.",
+      "mode": "gate",
+      "offSetPenalty": 0.7,
+      "looseSpeedException": true,
+      "looseSpeedMinValue": 15,
+      "_buildShape": "Padrão 4+2. Exceções: 2+2+2 (raro) e 4 + 2 soltas (heróis de velocidade pura, as 2 soltas valem pelo substat, não pelo efeito).",
+      "archetypeSetsAreSuggestions": true,
+      "heroSetIsGate": true
+    },
+    "mainStatPolicy": {
+      "_desc": "Main flat (Attack/Health/Defense) em acessório (colar/anel/bota) quase nunca serve: flat não escala com o atributo base do herói, % sim. Boots SPEED é a exceção valiosa e escassa.",
+      "flatMainAccessoryPenalty": 0.85,
+      "flatMainAccessoryExceptions": [
+        "Speed"
+      ],
+      "gateStrict": true
+    }
+  },
+  "accountCoverage": {
+    "_desc": "Falta/sobra na conta: peças BOAS daquele slot/perfil vs heróis relevantes que precisam. Ex.: botas de main SPEED são escassas e quase todo mundo quer -> altíssima prioridade.",
+    "surplusRatio": 1.5,
+    "shortageBonusMax": 0.3,
+    "countGoodThreshold": 0.55,
+    "criticalCategories": [
+      "Boots:Speed"
+    ]
+  },
+  "minViableBuild": {
+    "_desc": "Nível mínimo de gear para valer a pena montar o herói. Abaixo disso, melhor ESPERAR do que gastar peças meia-boca. Ajustável; pode ser sobrescrito por arquétipo (minGearScore).",
+    "defaultMinTotalScore": 55,
+    "waitIfBelow": true
+  },
+  "upgradePolicy": {
+    "_desc": "Quando upar, por raridade. Custo sobe com o nível: +3/+6 são baratos pra 'testar'; +12/+15 caros, só para peças excelentes. Recalcular potencial/donos em cada checkpoint.",
+    "checkpoints": [
+      3,
+      6,
+      9,
+      12,
+      15
+    ],
+    "cheapTestUpTo": 6,
+    "deepUpgradeMinPotential": 0.7,
+    "epicSpeedSeek": {
+      "_desc": "Vermelho (Epic) com substat de speed: upar até +6 buscando concentrar rolls em speed (potencial de 20+). Primeiros níveis baratos.",
+      "ranks": [
+        "Epic"
+      ],
+      "requiresSpeedSub": true,
+      "testUpTo": 6
+    },
+    "heroicConservative": {
+      "_desc": "Roxo (Heroic): upar +3; se o novo roll NÃO for speed -> descartar; se for speed -> +6; se em +6 não vier mais speed -> descartar. Fora isso, nem upar roxo.",
+      "ranks": [
+        "Heroic"
+      ],
+      "firstStep": 3,
+      "keepOnlyIf": "speed",
+      "secondStep": 6,
+      "discardIfNoSpeedBy": 6
+    }
+  },
+  "thresholds": {
+    "worthUpgrading": 0.45,
+    "reevaluateAtEnhance": [
+      3,
+      6,
+      9,
+      12,
+      15
+    ],
+    "junkBelow": 0.2
+  },
+  "_notas": "heroFit/accountCoverage dependem de relevance.json (arquétipos/perfis) + comunidade/oficial + inventário (backend 8130). rollQuality usa gameRules.json. Ajustar por tentativa-e-erro."
+}

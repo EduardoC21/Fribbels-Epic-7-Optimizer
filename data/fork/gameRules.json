@@ -1,0 +1,2003 @@
+{
+  "_comment": "Regras CORE de gear do Epic Seven, destiladas do código do app (reforge.js, itemSimulator.js, mainStatFixer.js, constants.js, scanner.js). Fonte única para as features do fork. Se o jogo mudar, o upstream atualiza reforge.js/itemSimulator.js e este arquivo deve ser resincronizado. Ver .claude-notes/13-regras-core-gear.md.",
+  "_verifiedFrom": "app v1.10.0 / patch 20260828",
+  "slots": [
+    "Weapon",
+    "Helmet",
+    "Armor",
+    "Necklace",
+    "Ring",
+    "Boots"
+  ],
+  "ranks": {
+    "_ordem": [
+      "Normal",
+      "Good",
+      "Rare",
+      "Heroic",
+      "Epic"
+    ],
+    "_cores": {
+      "Normal": "cinza",
+      "Good": "verde",
+      "Rare": "azul",
+      "Heroic": "roxo",
+      "Epic": "vermelho/dourado"
+    },
+    "substatsIniciais": {
+      "Normal": 0,
+      "Good": 1,
+      "Rare": 2,
+      "Heroic": 3,
+      "Epic": 4
+    },
+    "rollsAte15": {
+      "Normal": 5,
+      "Good": 6,
+      "Rare": 7,
+      "Heroic": 8,
+      "Epic": 9
+    },
+    "power": {
+      "Normal": 0.8,
+      "Good": 0.85,
+      "Rare": 0.9,
+      "Heroic": 0.95,
+      "Epic": 1
+    }
+  },
+  "maxSubstats": 4,
+  "_rollsRule": "Peça ganha 1 substat a cada +3 até ter 4; depois cada +3 REFORÇA (rola) um substat existente. Rolls totais ao +15 = rollsAte15. Abaixo de +15: -1 roll por cada faixa de 3 (getMaxRolls).",
+  "enhanceRollsPenalty": {
+    "0": -5,
+    "3": -4,
+    "6": -3,
+    "9": -2,
+    "12": -1,
+    "15": 0
+  },
+  "mainStatsBySlot": {
+    "Weapon": [
+      "Attack"
+    ],
+    "Helmet": [
+      "Health"
+    ],
+    "Armor": [
+      "Defense"
+    ],
+    "Necklace": [
+      "CriticalHitChancePercent",
+      "CriticalHitDamagePercent",
+      "AttackPercent",
+      "Attack",
+      "HealthPercent",
+      "Health",
+      "DefensePercent",
+      "Defense"
+    ],
+    "Ring": [
+      "EffectivenessPercent",
+      "EffectResistancePercent",
+      "AttackPercent",
+      "Attack",
+      "HealthPercent",
+      "Health",
+      "DefensePercent",
+      "Defense"
+    ],
+    "Boots": [
+      "Speed",
+      "AttackPercent",
+      "Attack",
+      "HealthPercent",
+      "Health",
+      "DefensePercent",
+      "Defense"
+    ]
+  },
+  "_mainStatsFixos": "Weapon sempre Attack (flat), Helmet sempre Health (flat), Armor sempre Defense (flat). Só acessórios variam.",
+  "mainStatMaxValue_lv85_plus15": {
+    "Attack": 525,
+    "Health": 2835,
+    "Defense": 310,
+    "CriticalHitChancePercent": 60,
+    "CriticalHitDamagePercent": 70,
+    "AttackPercent": 65,
+    "HealthPercent": 65,
+    "DefensePercent": 65,
+    "EffectivenessPercent": 65,
+    "EffectResistancePercent": 65,
+    "Speed": 45
+  },
+  "substatsBySlot": {
+    "Weapon": [
+      "AttackPercent",
+      "Health",
+      "HealthPercent",
+      "Speed",
+      "CriticalHitChancePercent",
+      "CriticalHitDamagePercent",
+      "EffectivenessPercent",
+      "EffectResistancePercent"
+    ],
+    "Helmet": [
+      "Attack",
+      "AttackPercent",
+      "Defense",
+      "DefensePercent",
+      "HealthPercent",
+      "Speed",
+      "CriticalHitChancePercent",
+      "CriticalHitDamagePercent",
+      "EffectivenessPercent",
+      "EffectResistancePercent"
+    ],
+    "Armor": [
+      "DefensePercent",
+      "Health",
+      "HealthPercent",
+      "Speed",
+      "CriticalHitChancePercent",
+      "CriticalHitDamagePercent",
+      "EffectivenessPercent",
+      "EffectResistancePercent"
+    ],
+    "Necklace": [
+      "Attack",
+      "AttackPercent",
+      "Defense",
+      "DefensePercent",
+      "Health",
+      "HealthPercent",
+      "Speed",
+      "CriticalHitChancePercent",
+      "CriticalHitDamagePercent",
+      "EffectivenessPercent",
+      "EffectResistancePercent"
+    ],
+    "Ring": [
+      "Attack",
+      "AttackPercent",
+      "Defense",
+      "DefensePercent",
+      "Health",
+      "HealthPercent",
+      "Speed",
+      "CriticalHitChancePercent",
+      "CriticalHitDamagePercent",
+      "EffectivenessPercent",
+      "EffectResistancePercent"
+    ],
+    "Boots": [
+      "Attack",
+      "AttackPercent",
+      "Defense",
+      "DefensePercent",
+      "Health",
+      "HealthPercent",
+      "Speed",
+      "CriticalHitChancePercent",
+      "CriticalHitDamagePercent",
+      "EffectivenessPercent",
+      "EffectResistancePercent"
+    ]
+  },
+  "_substatsRule": "Um substat nunca repete o main stat da peça nem outro substat. Acessórios excluem o próprio main. Weapon não tem Attack/AttackFlat como sub (é o main); Armor não tem Defense flat; etc.",
+  "substatRollRangesByTier": {
+    "71": {
+      "flat": {
+        "Attack": {
+          "Epic": [
+            28,
+            40
+          ],
+          "Heroic": [
+            27,
+            38
+          ],
+          "Rare": [
+            25,
+            36
+          ]
+        },
+        "Defense": {
+          "Epic": [
+            24,
+            30
+          ],
+          "Heroic": [
+            22,
+            28
+          ],
+          "Rare": [
+            21,
+            27
+          ]
+        },
+        "Health": {
+          "Epic": [
+            136,
+            175
+          ],
+          "Heroic": [
+            129,
+            166
+          ],
+          "Rare": [
+            122,
+            157
+          ]
+        }
+      },
+      "percent": {
+        "Plain": [
+          4,
+          7
+        ],
+        "CriticalHitChancePercent": [
+          2,
+          4
+        ],
+        "CriticalHitDamagePercent": [
+          3,
+          6
+        ],
+        "Speed": [
+          1,
+          3
+        ]
+      }
+    },
+    "85": {
+      "flat": {
+        "Attack": {
+          "Epic": [
+            33,
+            46
+          ],
+          "Heroic": [
+            31,
+            44
+          ],
+          "Rare": [
+            29,
+            42
+          ]
+        },
+        "Defense": {
+          "Epic": [
+            28,
+            35
+          ],
+          "Heroic": [
+            26,
+            33
+          ],
+          "Rare": [
+            25,
+            31
+          ]
+        },
+        "Health": {
+          "Epic": [
+            157,
+            202
+          ],
+          "Heroic": [
+            149,
+            192
+          ],
+          "Rare": [
+            141,
+            182
+          ]
+        }
+      },
+      "percent": {
+        "Plain": [
+          4,
+          8
+        ],
+        "CriticalHitChancePercent": [
+          3,
+          5
+        ],
+        "CriticalHitDamagePercent": [
+          4,
+          7
+        ],
+        "Speed": [
+          1,
+          4
+        ]
+      },
+      "rareMax": {
+        "_desc": "Roll raro ACIMA da faixa (Eduardo, 2026-09-29): velocidade 5 numa peça 85, como valor inicial ou como up. Aparece como botão extra no up; o potencial usa o máximo normal (4) e passa de 100%.",
+        "Speed": 5
+      },
+      "rareMin": {
+        "_desc": "Roll raro ABAIXO da faixa (Eduardo, 2026-09-29): velocidade 1 numa peça 85 Épica (mínimo normal 2), tão raro quanto o 5. Botão extra no up; o potencial cai.",
+        "Speed": 1
+      }
+    },
+    "88": {
+      "flat": {
+        "Attack": {
+          "Epic": [
+            37,
+            53
+          ],
+          "Heroic": [
+            36,
+            50
+          ],
+          "Rare": [
+            34,
+            48
+          ]
+        },
+        "Defense": {
+          "Epic": [
+            32,
+            40
+          ],
+          "Heroic": [
+            30,
+            38
+          ],
+          "Rare": [
+            28,
+            36
+          ]
+        },
+        "Health": {
+          "Epic": [
+            178,
+            229
+          ],
+          "Heroic": [
+            169,
+            218
+          ],
+          "Rare": [
+            160,
+            206
+          ]
+        }
+      },
+      "percent": {
+        "Plain": [
+          5,
+          9
+        ],
+        "CriticalHitChancePercent": [
+          3,
+          6
+        ],
+        "CriticalHitDamagePercent": [
+          4,
+          8
+        ],
+        "Speed": [
+          3,
+          5
+        ]
+      }
+    },
+    "_desc": "Faixa [min, max] de UM roll de cada substat, por tier de item (nível) e raridade. Flats (Attack/Defense/Health) multiplicam pelo power da raridade."
+  },
+  "_plainStats": [
+    "AttackPercent",
+    "DefensePercent",
+    "HealthPercent",
+    "EffectivenessPercent",
+    "EffectResistancePercent"
+  ],
+  "_epicSpeedMinIs2": "Em item Epic, o roll mínimo de Speed conta como 2 (não 1).",
+  "reforge_85_to_90": {
+    "_desc": "Ao reforjar (85+15 -> 90) cada substat GANHA um bônus fixo dependente do nº de rolls acumulados naquele substat. Flats têm um adicional fixo por roll.",
+    "flatBonusPorRoll": {
+      "Attack": 11,
+      "Defense": 9,
+      "Health": 56
+    },
+    "plainStatRollsToValue": {
+      "1": 1,
+      "2": 3,
+      "3": 4,
+      "4": 5,
+      "5": 7,
+      "6": 8
+    },
+    "critDamageRollsToValue": {
+      "1": 1,
+      "2": 2,
+      "3": 3,
+      "4": 4,
+      "5": 6,
+      "6": 7
+    },
+    "speedRollsToValue": {
+      "1": 0,
+      "2": 1,
+      "3": 2,
+      "4": 3,
+      "5": 4,
+      "6": 4
+    },
+    "_flatReforgeRanges": {
+      "_desc": "Faixa do valor de UM roll de flat após reforja (lv90), por raridade Epic.",
+      "Attack": [
+        44,
+        57
+      ],
+      "Defense": [
+        37,
+        44
+      ],
+      "Health": [
+        213,
+        258
+      ]
+    },
+    "_flatReforgeRangesByRank": {
+      "Attack": {
+        "Epic": [
+          44,
+          57
+        ],
+        "Heroic": [
+          42,
+          55
+        ],
+        "Rare": [
+          40,
+          53
+        ]
+      },
+      "Defense": {
+        "Epic": [
+          37,
+          44
+        ],
+        "Heroic": [
+          35,
+          42
+        ],
+        "Rare": [
+          34,
+          40
+        ]
+      },
+      "Health": {
+        "Epic": [
+          213,
+          258
+        ],
+        "Heroic": [
+          205,
+          248
+        ],
+        "Rare": [
+          197,
+          238
+        ]
+      }
+    }
+  },
+  "gearScoreWeights": {
+    "_desc": "Peso de 1 ponto de cada substat no gear score. É também o peso do SCORE do jogo e do potencial (/fork/itemRatings). Dano Crítico 1,13: os 12 prints do Eduardo só fecham com arredondamento normal se o peso estiver entre 1,125 e 1,14 (8/7 = 1,1429 erra a arma Heroica +0). Fixos: no score do jogo multiplicam pelo poder da raridade (ranks.power: Heroica 0,95), porque a faixa do fixo escala com a raridade.",
+    "AttackPercent": 1,
+    "DefensePercent": 1,
+    "HealthPercent": 1,
+    "EffectivenessPercent": 1,
+    "EffectResistancePercent": 1,
+    "Attack": 0.08872,
+    "Health": 0.01776,
+    "Defense": 0.16097,
+    "CriticalHitDamagePercent": 1.13,
+    "CriticalHitChancePercent": 1.6,
+    "Speed": 2,
+    "_flatExact": {
+      "Attack": "3.46/39",
+      "Health": "3.09/174",
+      "Defense": "4.99/31",
+      "CriticalHitDamagePercent": "1,13 (ajustado aos prints; era 8/7)",
+      "CriticalHitChancePercent": "8/5",
+      "Speed": "8/4"
+    }
+  },
+  "sets": {
+    "byIndex": [
+      "HealthSet",
+      "DefenseSet",
+      "AttackSet",
+      "SpeedSet",
+      "CriticalSet",
+      "HitSet",
+      "DestructionSet",
+      "LifestealSet",
+      "CounterSet",
+      "ResistSet",
+      "UnitySet",
+      "RageSet",
+      "ImmunitySet",
+      "PenetrationSet",
+      "RevengeSet",
+      "InjurySet",
+      "ProtectionSet",
+      "TorrentSet",
+      "ReversalSet",
+      "RiposteSet",
+      "WarfareSet",
+      "PursuitSet",
+      "WeakeningSet",
+      "FervorSet"
+    ],
+    "piecesRequired": {
+      "HealthSet": 2,
+      "DefenseSet": 2,
+      "AttackSet": 4,
+      "SpeedSet": 4,
+      "CriticalSet": 2,
+      "HitSet": 2,
+      "DestructionSet": 4,
+      "LifestealSet": 4,
+      "CounterSet": 4,
+      "ResistSet": 2,
+      "UnitySet": 2,
+      "RageSet": 4,
+      "ImmunitySet": 2,
+      "PenetrationSet": 2,
+      "RevengeSet": 4,
+      "InjurySet": 4,
+      "ProtectionSet": 4,
+      "TorrentSet": 2,
+      "ReversalSet": 4,
+      "RiposteSet": 4,
+      "WarfareSet": 4,
+      "PursuitSet": 2,
+      "WeakeningSet": 4,
+      "FervorSet": 2
+    },
+    "bonusNoCalculo": {
+      "_desc": "Bônus de 4pc/2pc aplicados no StatCalculator/GPU kernel (sobre stat base do herói).",
+      "AttackSet_4pc": "+45% ATK base",
+      "HealthSet_2pc": "+15% HP base (por par)",
+      "DefenseSet_2pc": "+15% DEF base (por par)",
+      "SpeedSet_4pc": "+25% SPD base",
+      "RevengeSet_4pc": "+12% SPD base",
+      "ReversalSet_4pc": "+15% SPD base",
+      "FervorSet_4pc": "similar reversal",
+      "CriticalSet_2pc": "+12% CR",
+      "HitSet_2pc": "+20% EFF",
+      "ResistSet_2pc": "+20% RES",
+      "DestructionSet_4pc": "+40% CD",
+      "PenetrationSet_2pc": "penetração de def (SETTING_PEN_DEFENSE)",
+      "CounterSet_4pc": "chance de contra-ataque",
+      "LifestealSet_4pc": "roubo de vida",
+      "RageSet_4pc": "+dano vs debuffados",
+      "TorrentSet_2pc": "+HP e +dano por HP",
+      "UnitySet_2pc": "+4% dual attack",
+      "ImmunitySet_2pc": "imunidade 1 turno",
+      "InjurySet_4pc": "reduz cura inimiga / +dano scar",
+      "ProtectionSet_4pc": "barreira",
+      "RiposteSet_4pc": "contra-ataque forte",
+      "PursuitSet_2pc": "+dano perseguição",
+      "WarfareSet_4pc": "+CR/CD no início",
+      "WeakeningSet_4pc": "detonação de debuff"
+    }
+  },
+  "notasDeValor": {
+    "speedEscasso": "Speed é o stat mais valioso na prática: peso 2.0 no GS (o maior), roll baixo (85: 1-4 por roll), e é o único caminho para velocidade. Um anel/peça com 20+ speed em subs vale muito mais que outra peça de MESMO gear score, porque speed decide a ordem de turno. Considerar um bônus de 'raridade/escassez' além do GS ao avaliar peça.",
+    "critBase": "Todo herói: 15% CR e 150% CD base. Vantagem elemental dá +15% CR (por isso 85% CR mira 100% efetivo). Alguns têm crit automático em skill -> CR base no gear.",
+    "flatVsPercent": "% de gear incide sobre o stat BASE do herói (não sobre buffs). O StatCalculator do backend já calcula os finais; os dados de /getBuilds e do e7api já vêm finais."
+  },
+  "substatMods": {
+    "_desc": "Valor [min,max] que uma gema aplica ao substituir um substat, por nº de rolls (índice 0 = 1 roll ... índice 5 = 6 rolls). reforged = item lv90; unreforged = lv85. lesser/greater = tipo da gema.",
+    "reforged": {
+      "lesser": {
+        "Speed": [
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            5,
+            7
+          ],
+          [
+            7,
+            9
+          ],
+          [
+            9,
+            11
+          ],
+          [
+            10,
+            12
+          ]
+        ],
+        "Health": [
+          [
+            190,
+            228
+          ],
+          [
+            312,
+            397
+          ],
+          [
+            442,
+            527
+          ],
+          [
+            545,
+            616
+          ],
+          [
+            650,
+            771
+          ],
+          [
+            813,
+            896
+          ]
+        ],
+        "Defense": [
+          [
+            33,
+            39
+          ],
+          [
+            45,
+            70
+          ],
+          [
+            70,
+            92
+          ],
+          [
+            87,
+            104
+          ],
+          [
+            107,
+            127
+          ],
+          [
+            134,
+            148
+          ]
+        ],
+        "Attack": [
+          [
+            39,
+            51
+          ],
+          [
+            64,
+            87
+          ],
+          [
+            91,
+            119
+          ],
+          [
+            111,
+            137
+          ],
+          [
+            135,
+            165
+          ],
+          [
+            175,
+            194
+          ]
+        ],
+        "CriticalHitChancePercent": [
+          [
+            3,
+            4
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            6,
+            8
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            11,
+            13
+          ],
+          [
+            13,
+            15
+          ]
+        ],
+        "CriticalHitDamagePercent": [
+          [
+            4,
+            5
+          ],
+          [
+            6,
+            8
+          ],
+          [
+            9,
+            12
+          ],
+          [
+            13,
+            16
+          ],
+          [
+            17,
+            19
+          ],
+          [
+            19,
+            21
+          ]
+        ],
+        "AttackPercent": [
+          [
+            4,
+            6
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            12,
+            15
+          ],
+          [
+            16,
+            19
+          ],
+          [
+            20,
+            22
+          ],
+          [
+            22,
+            24
+          ]
+        ],
+        "DefensePercent": [
+          [
+            4,
+            6
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            12,
+            15
+          ],
+          [
+            16,
+            19
+          ],
+          [
+            20,
+            22
+          ],
+          [
+            22,
+            24
+          ]
+        ],
+        "HealthPercent": [
+          [
+            4,
+            6
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            12,
+            15
+          ],
+          [
+            16,
+            19
+          ],
+          [
+            20,
+            22
+          ],
+          [
+            22,
+            24
+          ]
+        ],
+        "EffectivenessPercent": [
+          [
+            4,
+            6
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            12,
+            15
+          ],
+          [
+            16,
+            19
+          ],
+          [
+            20,
+            22
+          ],
+          [
+            22,
+            24
+          ]
+        ],
+        "EffectResistancePercent": [
+          [
+            4,
+            6
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            12,
+            15
+          ],
+          [
+            16,
+            19
+          ],
+          [
+            20,
+            22
+          ],
+          [
+            22,
+            24
+          ]
+        ]
+      },
+      "greater": {
+        "Speed": [
+          [
+            2,
+            4
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            6,
+            8
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            10,
+            13
+          ],
+          [
+            11,
+            14
+          ]
+        ],
+        "Health": [
+          [
+            214,
+            259
+          ],
+          [
+            347,
+            448
+          ],
+          [
+            490,
+            590
+          ],
+          [
+            602,
+            685
+          ],
+          [
+            715,
+            858
+          ],
+          [
+            897,
+            995
+          ]
+        ],
+        "Defense": [
+          [
+            37,
+            44
+          ],
+          [
+            50,
+            79
+          ],
+          [
+            78,
+            103
+          ],
+          [
+            96,
+            116
+          ],
+          [
+            118,
+            142
+          ],
+          [
+            148,
+            165
+          ]
+        ],
+        "Attack": [
+          [
+            44,
+            58
+          ],
+          [
+            72,
+            99
+          ],
+          [
+            101,
+            134
+          ],
+          [
+            123,
+            153
+          ],
+          [
+            149,
+            184
+          ],
+          [
+            194,
+            217
+          ]
+        ],
+        "CriticalHitChancePercent": [
+          [
+            3,
+            5
+          ],
+          [
+            5,
+            8
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            11,
+            14
+          ],
+          [
+            14,
+            16
+          ],
+          [
+            16,
+            18
+          ]
+        ],
+        "CriticalHitDamagePercent": [
+          [
+            5,
+            8
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            11,
+            15
+          ],
+          [
+            15,
+            19
+          ],
+          [
+            19,
+            22
+          ],
+          [
+            21,
+            24
+          ]
+        ],
+        "AttackPercent": [
+          [
+            5,
+            9
+          ],
+          [
+            10,
+            14
+          ],
+          [
+            14,
+            18
+          ],
+          [
+            18,
+            22
+          ],
+          [
+            22,
+            25
+          ],
+          [
+            24,
+            27
+          ]
+        ],
+        "DefensePercent": [
+          [
+            5,
+            9
+          ],
+          [
+            10,
+            14
+          ],
+          [
+            14,
+            18
+          ],
+          [
+            18,
+            22
+          ],
+          [
+            22,
+            25
+          ],
+          [
+            24,
+            27
+          ]
+        ],
+        "HealthPercent": [
+          [
+            5,
+            9
+          ],
+          [
+            10,
+            14
+          ],
+          [
+            14,
+            18
+          ],
+          [
+            18,
+            22
+          ],
+          [
+            22,
+            25
+          ],
+          [
+            24,
+            27
+          ]
+        ],
+        "EffectivenessPercent": [
+          [
+            5,
+            9
+          ],
+          [
+            10,
+            14
+          ],
+          [
+            14,
+            18
+          ],
+          [
+            18,
+            22
+          ],
+          [
+            22,
+            25
+          ],
+          [
+            24,
+            27
+          ]
+        ],
+        "EffectResistancePercent": [
+          [
+            5,
+            9
+          ],
+          [
+            10,
+            14
+          ],
+          [
+            14,
+            18
+          ],
+          [
+            18,
+            22
+          ],
+          [
+            22,
+            25
+          ],
+          [
+            24,
+            27
+          ]
+        ]
+      }
+    },
+    "unreforged": {
+      "lesser": {
+        "Speed": [
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            5,
+            7
+          ],
+          [
+            6,
+            8
+          ]
+        ],
+        "Health": [
+          [
+            134,
+            172
+          ],
+          [
+            200,
+            285
+          ],
+          [
+            274,
+            359
+          ],
+          [
+            321,
+            392
+          ],
+          [
+            370,
+            491
+          ],
+          [
+            477,
+            560
+          ]
+        ],
+        "Defense": [
+          [
+            24,
+            30
+          ],
+          [
+            27,
+            52
+          ],
+          [
+            43,
+            65
+          ],
+          [
+            51,
+            68
+          ],
+          [
+            62,
+            82
+          ],
+          [
+            80,
+            94
+          ]
+        ],
+        "Attack": [
+          [
+            28,
+            40
+          ],
+          [
+            42,
+            65
+          ],
+          [
+            58,
+            86
+          ],
+          [
+            67,
+            93
+          ],
+          [
+            80,
+            110
+          ],
+          [
+            109,
+            128
+          ]
+        ],
+        "CriticalHitChancePercent": [
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            6,
+            8
+          ],
+          [
+            7,
+            9
+          ]
+        ],
+        "CriticalHitDamagePercent": [
+          [
+            3,
+            4
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            6,
+            9
+          ],
+          [
+            9,
+            12
+          ],
+          [
+            11,
+            13
+          ],
+          [
+            12,
+            14
+          ]
+        ],
+        "AttackPercent": [
+          [
+            3,
+            5
+          ],
+          [
+            5,
+            8
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            11,
+            14
+          ],
+          [
+            13,
+            15
+          ],
+          [
+            14,
+            16
+          ]
+        ],
+        "DefensePercent": [
+          [
+            3,
+            5
+          ],
+          [
+            5,
+            8
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            11,
+            14
+          ],
+          [
+            13,
+            15
+          ],
+          [
+            14,
+            16
+          ]
+        ],
+        "HealthPercent": [
+          [
+            3,
+            5
+          ],
+          [
+            5,
+            8
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            11,
+            14
+          ],
+          [
+            13,
+            15
+          ],
+          [
+            14,
+            16
+          ]
+        ],
+        "EffectivenessPercent": [
+          [
+            3,
+            5
+          ],
+          [
+            5,
+            8
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            11,
+            14
+          ],
+          [
+            13,
+            15
+          ],
+          [
+            14,
+            16
+          ]
+        ],
+        "EffectResistancePercent": [
+          [
+            3,
+            5
+          ],
+          [
+            5,
+            8
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            11,
+            14
+          ],
+          [
+            13,
+            15
+          ],
+          [
+            14,
+            16
+          ]
+        ]
+      },
+      "greater": {
+        "Speed": [
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            5,
+            8
+          ],
+          [
+            6,
+            9
+          ],
+          [
+            7,
+            10
+          ]
+        ],
+        "Health": [
+          [
+            158,
+            203
+          ],
+          [
+            235,
+            336
+          ],
+          [
+            322,
+            422
+          ],
+          [
+            378,
+            461
+          ],
+          [
+            435,
+            578
+          ],
+          [
+            561,
+            659
+          ]
+        ],
+        "Defense": [
+          [
+            28,
+            35
+          ],
+          [
+            32,
+            61
+          ],
+          [
+            51,
+            76
+          ],
+          [
+            60,
+            80
+          ],
+          [
+            73,
+            97
+          ],
+          [
+            94,
+            111
+          ]
+        ],
+        "Attack": [
+          [
+            33,
+            47
+          ],
+          [
+            50,
+            77
+          ],
+          [
+            68,
+            101
+          ],
+          [
+            79,
+            109
+          ],
+          [
+            94,
+            129
+          ],
+          [
+            128,
+            151
+          ]
+        ],
+        "CriticalHitChancePercent": [
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            5,
+            8
+          ],
+          [
+            7,
+            10
+          ],
+          [
+            9,
+            11
+          ],
+          [
+            10,
+            12
+          ]
+        ],
+        "CriticalHitDamagePercent": [
+          [
+            4,
+            7
+          ],
+          [
+            6,
+            9
+          ],
+          [
+            8,
+            12
+          ],
+          [
+            11,
+            15
+          ],
+          [
+            13,
+            16
+          ],
+          [
+            14,
+            17
+          ]
+        ],
+        "AttackPercent": [
+          [
+            4,
+            8
+          ],
+          [
+            7,
+            11
+          ],
+          [
+            10,
+            14
+          ],
+          [
+            13,
+            17
+          ],
+          [
+            15,
+            18
+          ],
+          [
+            16,
+            19
+          ]
+        ],
+        "DefensePercent": [
+          [
+            4,
+            8
+          ],
+          [
+            7,
+            11
+          ],
+          [
+            10,
+            14
+          ],
+          [
+            13,
+            17
+          ],
+          [
+            15,
+            18
+          ],
+          [
+            16,
+            19
+          ]
+        ],
+        "HealthPercent": [
+          [
+            4,
+            8
+          ],
+          [
+            7,
+            11
+          ],
+          [
+            10,
+            14
+          ],
+          [
+            13,
+            17
+          ],
+          [
+            15,
+            18
+          ],
+          [
+            16,
+            19
+          ]
+        ],
+        "EffectivenessPercent": [
+          [
+            4,
+            8
+          ],
+          [
+            7,
+            11
+          ],
+          [
+            10,
+            14
+          ],
+          [
+            13,
+            17
+          ],
+          [
+            15,
+            18
+          ],
+          [
+            16,
+            19
+          ]
+        ],
+        "EffectResistancePercent": [
+          [
+            4,
+            8
+          ],
+          [
+            7,
+            11
+          ],
+          [
+            10,
+            14
+          ],
+          [
+            13,
+            17
+          ],
+          [
+            15,
+            18
+          ],
+          [
+            16,
+            19
+          ]
+        ]
+      }
+    }
+  },
+  "speedRollsByEnhance": {
+    "_desc": "Estimativa de rolls de speed por enhance/raridade. notYetRolled = se speed ainda nao foi rolado; alreadyRolled = se ja tinha speed. speedRollsToValue = valor de speed por nº de rolls.",
+    "notYetRolled": {
+      "Epic": {
+        "0": 0,
+        "3": 0,
+        "6": 0,
+        "9": 0,
+        "12": 0,
+        "15": 0
+      },
+      "Heroic": {
+        "0": 2,
+        "3": 2,
+        "6": 2,
+        "9": 2,
+        "12": 0,
+        "15": 0
+      },
+      "Rare": {
+        "0": 2,
+        "3": 2,
+        "6": 2,
+        "9": 2,
+        "12": 0,
+        "15": 0
+      },
+      "Good": {
+        "0": 2,
+        "3": 2,
+        "6": 2,
+        "9": 2,
+        "12": 0,
+        "15": 0
+      },
+      "Normal": {
+        "0": 2,
+        "3": 2,
+        "6": 2,
+        "9": 2,
+        "12": 2,
+        "15": 0
+      }
+    },
+    "alreadyRolled": {
+      "Epic": {
+        "0": 5,
+        "3": 4,
+        "6": 3,
+        "9": 2,
+        "12": 1,
+        "15": 0
+      },
+      "Heroic": {
+        "0": 4,
+        "3": 3,
+        "6": 2,
+        "9": 1,
+        "12": 1,
+        "15": 0
+      },
+      "Rare": {
+        "0": 3,
+        "3": 2,
+        "6": 1,
+        "9": 1,
+        "12": 1,
+        "15": 0
+      },
+      "Good": {
+        "0": 2,
+        "3": 1,
+        "6": 1,
+        "9": 1,
+        "12": 1,
+        "15": 0
+      },
+      "Normal": {
+        "0": 1,
+        "3": 1,
+        "6": 1,
+        "9": 1,
+        "12": 1,
+        "15": 0
+      }
+    },
+    "speedRollsToValue": {
+      "0": 0,
+      "1": 0,
+      "2": 1,
+      "3": 2,
+      "4": 3,
+      "5": 4,
+      "6": 4
+    }
+  },
+  "buildShape": {
+    "_desc": "Herói usa 6 peças. Padrão: um set de 4 + um de 2 (4+2). Exceções: 2+2+2 (raro); 4 + 2 peças soltas (heróis de velocidade pura — as soltas valem pelo substat, não pelo efeito).",
+    "typical": "4+2",
+    "exceptions": [
+      "2+2+2",
+      "4+loose"
+    ]
+  },
+  "discouragedMainsBySlot": {
+    "_desc": "Main stats que quase nunca valem (flat não escala com base do herói). Boots Speed é a exceção valiosa.",
+    "Necklace": [
+      "Attack",
+      "Health",
+      "Defense"
+    ],
+    "Ring": [
+      "Attack",
+      "Health",
+      "Defense"
+    ],
+    "Boots": [
+      "Attack",
+      "Health",
+      "Defense"
+    ]
+  },
+  "gameScore": {
+    "_desc": "Pontos de Equipamento do JOGO (conta no backend: /fork/itemRatings). Ajustado em 16 peças dos prints do Eduardo (2026-09-29/30 e 10-01): TODAS batem com arredondamento normal. mainFactor 0,3975 (era 0,4: a armadura 90 do Arbiter dava 100 × 99 do jogo; confirmado em 3 peças que desempatavam — faixa que fecha 0,3972–0,398 com DC 1,13): main cheio da 90 = 25,84. score = Σ substatus × gearScoreWeights (fixo × ranks.power da raridade) + mainFactor × mainPct[nível] × (main ÷ mainMax[nível][tipo]). mainMax por nível EXATO quando existe (75/78/80 têm main fixo/velocidade menores: medido no inventário), senão pelo tier (85/88/90). Main cheio vale 23,85 no 85 +15 e 25,84 no 88/90 +15; no +0 (~1/5 do máximo) ~5.",
+    "mainFactor": 0.3975,
+    "mainPct": {
+      "85": 60,
+      "88": 65,
+      "90": 65
+    },
+    "mainMax": {
+      "75": {
+        "Attack": 465,
+        "Health": 2495,
+        "Defense": 275,
+        "Speed": 35
+      },
+      "78": {
+        "Attack": 475,
+        "Health": 2565,
+        "Defense": 285
+      },
+      "80": {
+        "Attack": 475,
+        "Health": 2565,
+        "Defense": 285,
+        "Speed": 40
+      },
+      "85": {
+        "Attack": 500,
+        "Health": 2700,
+        "Defense": 300,
+        "CriticalHitChancePercent": 55,
+        "CriticalHitDamagePercent": 65,
+        "AttackPercent": 60,
+        "HealthPercent": 60,
+        "DefensePercent": 60,
+        "EffectivenessPercent": 60,
+        "EffectResistancePercent": 60,
+        "Speed": 40
+      },
+      "88": {
+        "Attack": 515,
+        "Health": 2765,
+        "Defense": 310,
+        "CriticalHitChancePercent": 60,
+        "CriticalHitDamagePercent": 70,
+        "AttackPercent": 65,
+        "HealthPercent": 65,
+        "DefensePercent": 65,
+        "EffectivenessPercent": 65,
+        "EffectResistancePercent": 65,
+        "Speed": 45
+      },
+      "90": {
+        "Attack": 525,
+        "Health": 2835,
+        "Defense": 310,
+        "CriticalHitChancePercent": 60,
+        "CriticalHitDamagePercent": 70,
+        "AttackPercent": 65,
+        "HealthPercent": 65,
+        "DefensePercent": 65,
+        "EffectivenessPercent": 65,
+        "EffectResistancePercent": 65,
+        "Speed": 45
+      }
+    }
+  },
+  "potentialRules": {
+    "_desc": "Potencial (0..1; só passa de 1 com roll concentrado ou VEL 5; backend /fork/itemRatings v7). PEÇA: TODA peça compete com a ÉPICA 90 REFORJADA (Eduardo, 2026-09-30): (Σ peso×valor×concentração + main) ÷ ((rolls da peça + rolls que a raridade não tem) × roll da MELHOR 90 + main cheio da 90 [26]). Roll da melhor 90 = (9 rolls perfeitos de 8 + a maior reforja possível) ÷ 9: 100% FIXO, o rank acompanha o score entre peças terminadas; peça perfeita fica em 97–100% conforme tipos/distribuição; concentração e VEL 5 passam de 100%. 85 reforjável (não Gaveleet) entra com a reforja SIMULADA nos rolls que já teve e main da 90; nível < 85, 88 e Gaveleet entram com os valores reais (perdem a reforja). concentrationByUp = bônus (em roll daquela linha) do 3º, 4º e 5º up no MESMO substatus. Main pelo valor no +15 do nível da peça; todo main vale igual, menos o fixo num slot que tem o % (peso do score × fixo ÷ %). PARA ARQUÉTIPO/HERÓI (Eduardo, 2026-09-30): a mesma régua da peça, com cada substatus multiplicado. Úteis (barra > 0, contados por stat): subFit × subLadder[nível distinto da barra] ÷ média da escada nos 4 úteis de maior barra possíveis na peça (sem o main dela). Inúteis (barra ≤ 0): tirou o lugar de um útil que cabia (% OU fixo) → 0 (com poucos stats úteis o fixo útil vale mais que um inútil); inevitável → roll inicial sai da conta (nem soma, nem entra no 100%); ups sempre perdidos, e em barra −1 descontam negativeUpFactor do valor. Fixo = 100 ÷ base (herói; arquétipo = média dos heróis dele; sem heróis = média do jogo). Main: lista escolhida = 100% (e exclusiva); sem lista = mainLadder[nível distinto da barra entre os mains possíveis no slot], barra ≤ 0 = 0, fixo × (fixo pela base ÷ o % do mesmo stat); nenhum main útil possível = fora da conta. PEDRA simulada: uma por peça (já modificada = só a mesma linha), a peça é recalculada com a linha trocada por qualquer stat do slot fora do main e dos outros (o próprio também) no MÁXIMO da pedra maior para os rolls dela; Com perda desligado = só trocas que não baixam o potencial da peça. PEDRA: no MÁXIMO da pedra SUPERIOR (greater) para os rolls dela — tabela como o clássico (modificationFilter.js): 90 e 85 que reforja usam substatMods.reforged (2 rolls de ATK% = 10–14, valor já final); as demais, substatMods.unreforged.",
+    "gemKind": "greater",
+    "concentrationByUp": [
+      0.1,
+      0.15,
+      0.2
+    ],
+    "subLadder": [
+      1,
+      0.85,
+      0.7
+    ],
+    "subFit": 1.05,
+    "mainLadder": [
+      1,
+      0.85,
+      0.7
+    ],
+    "negativeUpFactor": 0.5
+  },
+  "rankByPotential": {
+    "_desc": "Rank D→SSS+ pelo potencial em % (Eduardo, 2026-09-30), ancorado na QUALIDADE dos rolls com o 100% fixo da melhor 90: SSS+ além do teto (concentração, VEL 5) · SSS quase perfeita (rolls ~94%+ do máximo) · SS muito boa (~87%+) · S acima da média (~80%+) · A média (roll médio do jogo ≈ 84%) · B abaixo da média · C perto do mínimo (tudo no mínimo ≈ 69%) · D pior que tudo no mínimo (fixo, nível/raridade menor; para herói, ups em stat inútil).",
+    "cuts": [
+      [
+        100,
+        "SSS+"
+      ],
+      [
+        95,
+        "SSS"
+      ],
+      [
+        90,
+        "SS"
+      ],
+      [
+        86,
+        "S"
+      ],
+      [
+        82,
+        "A"
+      ],
+      [
+        76,
+        "B"
+      ],
+      [
+        69,
+        "C"
+      ],
+      [
+        0,
+        "D"
+      ]
+    ]
+  }
+}

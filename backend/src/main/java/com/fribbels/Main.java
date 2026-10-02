@@ -67,6 +67,7 @@ public class Main {
     server.createContext("/items", new ItemsRequestHandler(itemDb, heroDb, baseStatsDb, heroesRequestHandler));
     server.createContext("/optimization", new OptimizationRequestHandler(baseStatsDb, heroDb, itemDb));
     server.createContext("/heroes", heroesRequestHandler);
+    com.fribbels.fork.ForkRoutes.register(server, baseStatsDb, heroDb, artifactStatsDb); // FORK: única linha do fork no upstream
 
     System.out.println("START BACKEND WITH " + THREADS + " THREADS");
 

@@ -139,6 +139,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     Importer.addEventListener();
 
+    try { require('../../fork/launcher').initialize(); } catch (e) { console.warn('Fork launcher falhou:', e); } // FORK
+
     console.log("Document initialized")
 });
 
