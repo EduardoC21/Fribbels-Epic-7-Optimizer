@@ -37,6 +37,9 @@ const G = {
     <path d="M12 2.6v2.6M12 18.8v2.6M2.6 12h2.6M18.8 12h2.6M5.4 5.4l1.9 1.9M16.7 16.7l1.9 1.9M18.6 5.4l-1.9 1.9M7.3 16.7l-1.9 1.9" /><//>`,
   /* origem das builds: salva por você · comunidade · pros (o "buildado"/equipada
      usa o asset de armadura do próprio jogo, via GearIcon) */
+  /* configurações: engrenagem DENTADA (a 'gear' de raios é o Equipável) */
+  'settings': () => html`<${F}><path d="M10.6 4.9L10.8 2.5L13.2 2.5L13.4 4.9L16.0 6.0L17.9 4.4L19.6 6.1L18.0 8.0L19.1 10.6L21.5 10.8L21.5 13.2L19.1 13.4L18.0 16.0L19.6 17.9L17.9 19.6L16.0 18.0L13.4 19.1L13.2 21.5L10.8 21.5L10.6 19.1L8.0 18.0L6.1 19.6L4.4 17.9L6.0 16.0L4.9 13.4L2.5 13.2L2.5 10.8L4.9 10.6L6.0 8.0L4.4 6.1L6.1 4.4L8.0 6.0z" /><circle cx="12" cy="12" r="3.2" /><//>`,
+  'folder':   () => html`<path d="M3.5 6.5a1.5 1.5 0 0 1 1.5-1.5h4.2l2 2.2H19a1.5 1.5 0 0 1 1.5 1.5v9.3a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5z" />`,
   'save':   () => html`<${F}><path d="M5 3.5h11l3.5 3.5v12a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19V5A1.5 1.5 0 0 1 5 3.5z" /><path d="M7.5 3.5v5h8v-5" /><path d="M7.5 20.5v-6h9v6" /><//>`,
   'people': () => html`<${F}><circle cx="9" cy="8" r="3.2" /><path d="M3 20c0-3.3 2.7-5.8 6-5.8s6 2.5 6 5.8" /><path d="M15.5 4.9a3.2 3.2 0 0 1 0 6.2" /><path d="M17.5 14.5c2 .7 3.5 2.8 3.5 5.5" /><//>`,
   'crown':  () => html`<${F}><path d="M3.5 8l4.3 4 4.2-7 4.2 7 4.3-4-1.7 10.5H5.2z" /><path d="M5.2 21h13.6" /><//>`,

@@ -28,6 +28,8 @@ const { useApp } = require('../../state/app.js');
 const { ItemPopout } = require('../item/ItemPopout.js');
 const { ItemTable } = require('./ItemTable.js');
 const { GearFilters } = require('./GearFilters.js');
+const { EmptyState } = require('../../components/index.js');
+const { noAccount, inventoryIcon } = require('../shell/emptyStates.js');
 const { ItemDetail } = require('./ItemDetail.js');
 const G = require('./gearList.js');
 const B = require('./batchState.js');
@@ -91,26 +93,26 @@ function GearScreen({ initialMode, initialSel, initialWide }) {
   // notas das caixas: as do rascunho assim que o backend responde; até lá, as do gravado
   const notesItem = selItem && live && live.id === selItem.id && itemRank.potentialOf(live) != null ? live : selItem;
 
-  if (!app.account.ready) {
-    return html`<div className="eq"><div className="eq-empty sub">${app.account.loading
-      ? 'Carregando o inventário…'
-      : `Sem conta: o backend não respondeu (${app.account.error || 'fora do ar'}). Abra o app principal e importe o inventário.`}</div></div>`;
+  const none = noAccount(app.account);
+  if (none) return html`<div className="eq">${none}</div>`;
+  if (!all.length) {
+    return html`<div className="eq"><${EmptyState} icon=${inventoryIcon()} title="Inventário vazio"
+      tip="Sincronize a conta com o jogo (Ouvir o jogo)" /></div>`;
   }
 
   if (mode === 'batch') return html`<div className="eq"><${UpBatch} onBack=${() => setMode('list')} /></div>`;
 
   return html`<div className="eq">
-    ${all.length ? html`<${GearFilters} filters=${f} onChange=${app.setGearFilters} opts=${opts}
+    <${GearFilters} filters=${f} onChange=${app.setGearFilters} opts=${opts}
       total=${all.length} shown=${items.length}
-      interest=${{ value: app.interestGlobal, onChange: app.setGlobalInterest, limit: app.interestLimit, onLimit: app.setInterestLimit,
+      interest=${{ limit: app.interestLimit, onLimit: app.setInterestLimit,
         gemMode: app.gemMode, onGemMode: app.setGemMode, targets, codeOf }}
-      batch=${{ count: batch.ids.length, pending: pend, onOpen: () => setMode('batch') }} />` : ''}
+      batch=${{ count: batch.ids.length, pending: pend, onOpen: () => setMode('batch') }} />
     <div className="eq-main">
       <div className="eq-list">
         <${ItemTable} items=${items} onPick=${pick} onOpen=${edit} pickedId=${sel} codeOf=${codeOf}
           profiles=${app.ratingProfiles} profileId=${tProfile ? tProfile.id : null} ver=${app.ratingsVer}
-          empty=${!all.length ? 'O inventário está vazio: importe as peças no app principal.'
-            : 'Nenhuma peça com esses filtros.'} />
+          empty="Nenhuma peça com esses filtros" />
       </div>
       ${wide
         ? html`<div className="eqw">

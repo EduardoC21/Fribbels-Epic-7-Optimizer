@@ -22,7 +22,7 @@ const upstream = require('./upstream.js');
 const heroBonus = require('./heroBonus.js');
 
 const SLOTS = ['Weapon', 'Helmet', 'Armor', 'Necklace', 'Ring', 'Boots'];
-const escutaDir = () => path.join(paths.savesDir(), 'escuta');
+const escutaDir = () => path.join(paths.homeDir(), 'escuta');   // fixa: o escuta.py grava em Documents/…
 const codesFile = () => path.join(paths.dataDir(), 'fork', 'gameCodes.json');
 
 function readInventory() {

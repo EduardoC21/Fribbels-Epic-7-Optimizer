@@ -47,7 +47,7 @@ const { EditFields } = require('./EditFields.js');
 
 /* `initial` ({ draft, editing, modLine, modType }) só para teste/sonda de layout — mesmo
    papel dos initial* do AppProvider. Em uso normal fica vazio. */
-/* `gemMode`: modo da pedra da nota do herói ao ABRIR (tela de herói: o do herói; sem = o da tela Equipamentos).
+/* `gemMode`: modo da pedra da nota do herói ao ABRIR (tela de herói e Cobertura: o do herói; sem = o da tela Equipamentos).
    Escolher outro na caixinha do cabeçalho vale só neste editor (outra peça = volta ao da tela). */
 function ItemPopout({ itemId, newSlot, ownerName, onClose, initial, inline, guard, onDraft, gemMode }) {
   const app = useApp();

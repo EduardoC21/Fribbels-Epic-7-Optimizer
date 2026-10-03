@@ -189,7 +189,13 @@ async function forkConvertGame(request) {
 const mergeHeroes = (items, heroes, enhanceLimit, heroFilter) =>
   post('/items/mergeHeroes', { items, mergeHeroes: heroes, enhanceLimit, heroFilter }, 120000);
 
+/* versão do fork no backend (ForkHandler.VERSION); null = backend fora do ar ou sem o fork */
+const forkPing = () => post('/fork/ping', {}, 3000).then((r) => (r && r.version) || null, () => null);
+const setItems = (items) => post('/items/setItems', { items });
+const setHeroes = (heroes) => post('/heroes/setHeroes', { heroes });
+
 module.exports = {
+  forkPing, setItems, setHeroes,
   forkCalculateStats, forkGearNeeded, forkSetBonus, forkArtifactStats, forkItemRatings, forkConvertGame, mergeHeroes,
   saveOptimizationRequest, openInOptimizer,
   ENDPOINT, post,

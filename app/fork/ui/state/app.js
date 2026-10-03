@@ -29,6 +29,8 @@ const itemRatings = require('../../lib/itemRatings.js');
 const mainCurve = require('../../lib/mainCurve.js');
 const interest = require('../../lib/interest.js');
 const archetypes = require('../../lib/archetypes.js');
+const forkPaths = require('../../lib/forkPaths.js');
+const maintenance = require('../../lib/maintenance.js');
 
 const Ctx = React.createContext(null);
 
@@ -295,17 +297,17 @@ function AppProvider({ children, initialScreen, initialAccount, initialRel, init
    *     win rate) → caixa RTA.
    * entry = { status, summary, computed, error, rtaStatus, official, officialError, tier }
    * Abrir a aba lê só o CACHE (sem rede); a rede é só no botão.
-   * Tier e quantidade são POR HERÓI (lib/rtaTiers.js): nunca baixado = Imperador / 1.000.
+   * Tier e quantidade são POR HERÓI (lib/rtaTiers.js): nunca baixado = o padrão da tela Configurações.
    */
   const [community, setCommunity] = useState(() => initialCommunity || {});
   const [savedPrefs, setSavedPrefs] = useState(() => (initialCommunity ? {} : rtaTiers.load()));
   const [pending, setPending] = useState({});   // { [herói]: { tier?, count? } } escolhido e ainda não baixado
-  const prefsRef = useRef({ savedPrefs, pending });
-  prefsRef.current = { savedPrefs, pending };
+  const prefsRef = useRef({ savedPrefs, pending, rel });
+  prefsRef.current = { savedPrefs, pending, rel };
   const rtaTierOf = useCallback((name) => (prefsRef.current.pending[name] || {}).tier
-    || rtaTiers.tierOf(prefsRef.current.savedPrefs, name), [savedPrefs, pending]);
+    || rtaTiers.tierOf(prefsRef.current.savedPrefs, name, prefsRef.current.rel.communityTier), [savedPrefs, pending, rel.communityTier]);
   const buildsCountOf = useCallback((name) => (prefsRef.current.pending[name] || {}).count
-    || rtaTiers.countOf(prefsRef.current.savedPrefs, name), [savedPrefs, pending]);
+    || rtaTiers.countOf(prefsRef.current.savedPrefs, name, prefsRef.current.rel.communityCount), [savedPrefs, pending, rel.communityCount]);
   const patchEntry = (name, patch) => setCommunity((c) => ({ ...c, [name]: { ...(c[name] || {}), ...patch } }));
   const choose = (name, patch) => {
     setPending((m) => ({ ...m, [name]: { ...(m[name] || {}), ...patch } }));
@@ -524,6 +526,8 @@ function AppProvider({ children, initialScreen, initialAccount, initialRel, init
       });
     }, [saveOptimizer]),
     setProfileGemMode: useCallback((m) => setRel((s) => relevance.setProfileGemMode(s, m)), []),
+    /* tela Configurações: communityTier/communityCount/communityDays/autoSync (relevance.SETTINGS; null = padrão) */
+    setSetting: useCallback((key, v) => setRel((s) => relevance.setSetting(s, key, v)), []),
     setHeroGemMode: useCallback((name, m) => setHeroGemModes((s) => ({ ...s, [name]: m })), []),
     setHeroInterest: useCallback((name, v) => setRel((s) => relevance.setProfile(s, name,
       Object.assign({}, relevance.getProfile(s, name) || {}, { interestMin: v == null ? null : v }))), []),
@@ -565,6 +569,16 @@ function AppProvider({ children, initialScreen, initialAccount, initialRel, init
     }, [allNames]),
   };
 
+  /* tela Configurações: versão do fork no backend (uma vez, quando a conta conecta) e a pasta dos saves */
+  const [forkVersion, setForkVersion] = useState(null);
+  useEffect(() => { if (account.ready && !initialAccount) backend.forkPing().then(setForkVersion); }, [account.ready]);
+  /* troca a pasta dos saves: grava a conta, copia e confere (lib/maintenance.js) e aponta o settings.ini.
+     Quem chama reinicia o app (o clássico só relê a pasta ao abrir). */
+  const switchSavesFolder = useCallback(async (dest) => {
+    if (accountRef.current.ready) await forkSave.autoSave().catch(() => {});   // conta vazia: nada a gravar
+    return maintenance.switchFolder(dest);
+  }, []);
+
   const value = {
     heroes, byName, allNames, ranked, catalogError,
     rel, account, setsByName,
@@ -573,6 +587,7 @@ function AppProvider({ children, initialScreen, initialAccount, initialRel, init
     ...buildActs,
     artifactLevels, ensureArtifactLevels,
     community, loadCommunity, downloadCommunity, loadBuilds, loadRta, rtaTierOf, setRtaTier, buildsCountOf, setBuildsCount,
+    communityDays: rel.communityDays || communityBuilds.CACHE_TTL_MS / 864e5, autoSync: rel.autoSync !== false,
     marks, toggleMark, consPreset,
     target: target && target.heroName === selected ? target : null,
     markedOf: (n) => markedBuilds.list(marks, n),
@@ -585,6 +600,7 @@ function AppProvider({ children, initialScreen, initialAccount, initialRel, init
     isBuilt: (n) => { const h = account.byName[n]; return !!(h && h.equipment && Object.keys(h.equipment).length); },
     profileOf: (n) => relevance.getProfile(rel, n),
     rel,
+    forkVersion, savesDir: forkPaths.savesDir(), planSavesFolder: maintenance.planSwitch, switchSavesFolder,
     ...act,
   };
 

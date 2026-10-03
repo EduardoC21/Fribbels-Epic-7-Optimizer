@@ -15,6 +15,7 @@
 const { html, useMemo, useState } = require('../../h.js');
 const { SectionLabel, Button, Glyph, Menu } = require('../../components/index.js');
 const { useApp } = require('../../state/app.js');
+const { offAccount } = require('../shell/emptyStates.js');
 const { BuildTable } = require('../builds/BuildTable.js');
 const buildRows = require('../builds/buildRows.js');
 const { pickHandler } = require('../builds/pick.js');
@@ -61,6 +62,9 @@ function PrincipalTab({ hero }) {
     { label: 'Apagar', icon: 'trash', danger: true, onClick: () => setDialog({ kind: 'remove', row: menu.row }) },
   ] : [];
 
+  // fora da conta e sem build marcada: a aba inteira vira o bloco "sem dados" (padrão das telas)
+  if (!acc && !rows.length) return offAccount();
+
   return html`<section className="pl">
     <div className="pl-head">
       <${SectionLabel}>${marked.length ? 'Build atual, salvas e marcadas' : 'Build atual e salvas'}<//>
@@ -70,7 +74,7 @@ function PrincipalTab({ hero }) {
     </div>
     <${BuildTable} rows=${rows} mark=${mark}
       onPick=${onPick} pickedKey=${app.target && app.target.row.key} onRowMenu=${onRowMenu}
-      empty=${acc ? 'Sem builds.' : 'Herói fora da conta importada — sem build equipada nem salva. Marque builds na aba Construções para compará-las aqui.'} />
+      empty="Sem builds" />
     ${menu ? html`<${Menu} at=${menu.at} items=${menuItems} label=${`Build ${menu.row.name}`} onClose=${() => setMenu(null)} />` : ''}
     ${dialog && dialog.kind === 'save' ? html`<${NameDialog} title="Salvar build atual" initial=${`Build ${saved.length + 1}`}
       confirmLabel="Salvar" onConfirm=${(n) => app.saveBuild(hero.name, n)} onClose=${() => setDialog(null)} />` : ''}

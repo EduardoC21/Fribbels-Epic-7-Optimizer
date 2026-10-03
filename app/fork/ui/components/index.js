@@ -26,5 +26,6 @@ module.exports = Object.assign(
   require('./useVirtualRows.js'),
   require('./HoverCard.js'),
   require('./InterestCut.js'),
-  require('./Delta.js')
+  require('./Delta.js'),
+  require('./EmptyState.js')
 );

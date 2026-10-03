@@ -13,7 +13,7 @@
  */
 'use strict';
 const { html, useState, useEffect, useRef, useMemo } = require('../../h.js');
-const { Scrollable, Button, Glyph, SetIcon, StatIcon, ArchetypeSymbol } = require('../../components/index.js');
+const { Scrollable, Button, Glyph, SetIcon, StatIcon, ArchetypeSymbol, EmptyState } = require('../../components/index.js');
 const { useApp } = require('../../state/app.js');
 const { ConfirmDialog } = require('../principal/BuildDialogs.js');
 const { ArchetypeEditor } = require('./ArchetypeEditor.js');
@@ -184,12 +184,9 @@ function ArchetypeScreen() {
       ${sel ? html`<${ArchetypeEditor} key=${sel.id} arch=${sel} fresh=${fresh === sel.id}
           twins=${twins} variants=${variants} byName=${app.byName} onChange=${edit}
           onAskDelete=${() => setAsking(true)} onOpenHero=${app.openHeroOptimizer} globalMin=${app.interestGlobal} globalGem=${app.profileGemMode} />`
-        : html`<div className="ab-empty">
-          <${ArchetypeSymbol} size=${96} symbol=${EXAMPLE} />
-          <h2>Nenhum arquétipo ainda</h2>
-          <${Button} variant="accent" onClick=${create}>
-            <span className="contents"><${Glyph} name="plus" size=${14} /> Criar o primeiro arquétipo</span><//>
-        </div>`}
+        : html`<${EmptyState} art=${html`<${ArchetypeSymbol} size=${96} symbol=${EXAMPLE} />`} title="Nenhum arquétipo ainda"
+            action=${html`<${Button} variant="accent" onClick=${create}>
+              <span className="contents"><${Glyph} name="plus" size=${14} /> Criar o primeiro arquétipo</span><//>`} />`}
     <//>
 
     ${asking && sel ? html`<${ConfirmDialog} title="Apagar arquétipo"

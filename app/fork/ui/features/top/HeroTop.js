@@ -86,7 +86,7 @@ function HeroTop({ hero }) {
           ? html`<${GearGrid} key=${view} equipment=${shown.equipment} gemMode=${heroMode}
               onOpenItem=${(it) => setPopout({ itemId: it.id })}
               onNewItem=${saved ? undefined : setEmptySlot} />`
-          : html`<div className="pt-noacc" title="Herói fora da conta importada"></div>`}
+          : html`<${GearGrid} equipment=${{}} />`}
       </section>
     </div>
     ${popout ? html`<${ItemPopout} key=${popout.itemId || popout.newSlot} itemId=${popout.itemId} newSlot=${popout.newSlot} gemMode=${heroMode}

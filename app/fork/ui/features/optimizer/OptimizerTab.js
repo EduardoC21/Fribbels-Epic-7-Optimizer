@@ -30,6 +30,7 @@ const { html, useState, useMemo } = require('../../h.js');
 const { Box, Button, Dropdown, Glyph, SetIcon, ArchetypeSymbol, InterestCut, Modal } = require('../../components/index.js');
 const { ProfileSplit, useAutoSave, withStat } = require('./profileEditor.js');
 const { useApp } = require('../../state/app.js');
+const { offAccount } = require('../shell/emptyStates.js');
 const statInfo = require('../../../lib/statInfo.js');
 const archetypes = require('../../../lib/archetypes.js');
 const OP = require('../../../lib/optimizerProfile.js');
@@ -201,11 +202,7 @@ function OptimizerTab({ hero }) {
   const app = useApp();
   const acc = app.accountHero(hero.name);
 
-  if (!acc) {
-    return html`<${Box} pad=${true} className="op-empty">
-      <p className="label">Herói fora da conta importada</p>
-    <//>`;
-  }
+  if (!acc) return offAccount();
   return html`<${OptimizerBoxes} key=${hero.name} hero=${hero} acc=${acc} />`;
 }
 

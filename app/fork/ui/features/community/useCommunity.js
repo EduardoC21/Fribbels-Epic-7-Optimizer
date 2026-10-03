@@ -5,7 +5,7 @@
  */
 'use strict';
 const { html, useEffect } = require('../../h.js');
-const { Box, Button, Glyph } = require('../../components/index.js');
+const { Button, Glyph, EmptyState } = require('../../components/index.js');
 const { useApp } = require('../../state/app.js');
 
 function useCommunity(hero) {
@@ -27,14 +27,19 @@ function useCommunity(hero) {
 
 /* null quando há dados; senão a caixa que explica o que falta */
 function missing({ app, entry, summary }, hero) {
-  if (!entry || (entry.status === 'loading' && !summary)) return html`<${Box} pad=${true} className="sub">Lendo os dados…<//>`;
-  if (entry.status === 'error' && !summary) return html`<${Box} pad=${true} className="cm-empty">Não foi possível ler os dados: ${entry.error}<//>`;
+  if (!entry || (entry.status === 'loading' && !summary)) {
+    return html`<${EmptyState} compact=${true} icon=${html`<${Glyph} name="download" size=${28} />`} title="Lendo os dados…" />`;
+  }
+  if (entry.status === 'error' && !summary) {
+    return html`<${EmptyState} compact=${true} icon=${html`<${Glyph} name="alert" size=${30} />`} title="Não foi possível ler os dados"
+      tip=${entry.error} action=${html`<${Button} onClick=${() => app.downloadCommunity(hero.name)}>
+        <${Glyph} name="download" size=${14} /> Baixar de novo<//>`} />`;
+  }
   if (summary) return null;
-  return html`<${Box} pad=${true} className="cm-empty">
-    <${Button} variant="accent" title="Builds de maior gear score e RTA oficial; só o nome do herói sai do computador"
-      onClick=${() => app.downloadCommunity(hero.name)}>
-      <${Glyph} name="download" size=${14} /> Baixar<//>
-  <//>`;
+  return html`<${EmptyState} compact=${true} icon=${html`<${Glyph} name="download" size=${28} />`} title="Nada baixado"
+    tip="Builds de maior gear score e RTA oficial; só o nome do herói sai do computador"
+    action=${html`<${Button} variant="accent" onClick=${() => app.downloadCommunity(hero.name)}>
+      <${Glyph} name="download" size=${14} /> Baixar<//>`} />`;
 }
 
 /*

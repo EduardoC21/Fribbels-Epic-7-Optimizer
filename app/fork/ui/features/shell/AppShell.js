@@ -11,7 +11,8 @@
  */
 'use strict';
 const { html, useState, useEffect } = require('../../h.js');
-const { Tabs, Scrollable } = require('../../components/index.js');
+const { Tabs, Scrollable, Glyph, EmptyState, Button } = require('../../components/index.js');
+const { offAccount } = require('./emptyStates.js');
 const { useApp } = require('../../state/app.js');
 const { HeroSidebar } = require('../sidebar/HeroSidebar.js');
 const { Catalog } = require('../../Catalog.js');
@@ -27,6 +28,7 @@ const { CoverageSection } = require('../coverage/CoverageSection.js');
 const interest = require('../../../lib/interest.js');
 const { GearScreen } = require('../gear/GearScreen.js');
 const { GameLink } = require('./GameLink.js');
+const { SettingsScreen } = require('../settings/SettingsScreen.js');
 
 const SCREENS = [
   { id: 'otimizador', label: 'Otimizador' },   // a tela própria de otimização (ainda vazia)
@@ -34,6 +36,7 @@ const SCREENS = [
   { id: 'heroi', label: 'Heróis' },
   { id: 'arquetipos', label: 'Arquétipos' },
   { id: 'cobertura', label: 'Cobertura' },
+  { id: 'config', label: 'Configurações', icon: 'settings' },   // engrenagem: último item da barra, no canto direito
   // 'estilo' (catálogo de componentes) fica fora da barra; SCREEN_EL mantém para quem precisar
 ];
 
@@ -51,11 +54,17 @@ const LIST_TABS = new Set(['principal', 'construcoes', 'cobertura']);
    editáveis aqui, as MESMAS do Otimizador do herói, com a mesma regra do gêmeo (outro valor = pergunta e vira variante) */
 function HeroCoverage({ hero }) {
   const app = useApp();
+  const { request, dialog } = useTwinAsk();
+  if (!app.accountHero(hero.name)) return offAccount();
   const p = interest.profileFor(app.ratingProfiles, 'h:' + hero.name);
+  // sem barras no Otimizador não há perfil: nada a cobrir (a régua e a pedra também estão no Otimizador)
+  if (!p) {
+    return html`<${EmptyState} compact=${true} icon=${html`<${Glyph} name="sort" size=${30} />`} title="Sem barras no Otimizador"
+      action=${html`<${Button} onClick=${() => app.setTab('otimizador')}>Otimizador<//>`} />`;
+  }
   const twin = p && p.kind === 'a';
   const own = app.profileOf(hero.name) || {};
   const tier = app.isFavorite(hero.name) || app.isEquipavel(hero.name) ? 1 : 0;
-  const { request, dialog } = useTwinAsk();
   const h = ruleHandlers(app, hero.name, twin ? { name: p.name, min: p.min, gem: p.gem } : null, request);
   const rule = {
     value: own.interestMin, inherited: twin ? p.min : (p ? p.inhMin : app.interestGlobal),
@@ -93,13 +102,15 @@ function HeroScreen() {
         <${Tabs} items=${HERO_TABS} value=${app.tab} onChange=${app.setTab}
           right=${html`<${CommunityActions} hero=${hero} />`} />
         <div className="tab-body"><${HeroTabContent} tab=${app.tab} hero=${hero} /></div>
-      </div>` : html`<div className="pt-empty"></div>`}
+      </div>` : html`<${EmptyState} icon=${html`<${Glyph} name="people" size=${30} />`} title="Nenhum herói escolhido" />`}
     <//>
   </div>`;
 }
 
-const OptimizerScreen = () => html`<div className="eq" aria-label="Otimizador"></div>`;
-const SCREEN_EL = { otimizador: OptimizerScreen, heroi: HeroScreen, equipamentos: GearScreen, arquetipos: ArchetypeScreen, cobertura: CoverageScreen, estilo: Catalog };
+// a tela própria de otimização ainda não existe: o mesmo bloco "sem dados" das outras telas
+const OptimizerScreen = () => html`<div className="eq" aria-label="Otimizador">
+  <${EmptyState} icon=${html`<${Glyph} name="sort" size=${30} />`} title="Em construção" /></div>`;
+const SCREEN_EL = { otimizador: OptimizerScreen, heroi: HeroScreen, equipamentos: GearScreen, arquetipos: ArchetypeScreen, cobertura: CoverageScreen, config: SettingsScreen, estilo: Catalog };
 
 function AppShell() {
   const app = useApp();
@@ -107,7 +118,7 @@ function AppShell() {
   useEffect(() => { setVisited((v) => (v.has(app.screen) ? v : new Set(v).add(app.screen))); }, [app.screen]);
   return html`<div className="shell">
     <nav className="shell-nav" aria-label="Telas">
-      ${SCREENS.map((s) => html`<button type="button" key=${s.id}
+      ${SCREENS.filter((s) => !s.icon).map((s) => html`<button type="button" key=${s.id}
         className=${'shell-screen' + (app.screen === s.id ? ' on' : '')}
         aria-current=${app.screen === s.id ? 'page' : undefined}
         onClick=${() => app.setScreen(s.id)}>${s.label}</button>`)}
@@ -119,6 +130,10 @@ function AppShell() {
         ${app.account.ready ? `Conta · ${Object.keys(app.account.byName).length} heróis`
           : (app.account.loading ? 'Conectando…' : 'Sem conta')}
       </span>
+      ${SCREENS.filter((s) => s.icon).map((s) => html`<button type="button" key=${s.id}
+        className=${'shell-screen shell-icon' + (app.screen === s.id ? ' on' : '')}
+        aria-current=${app.screen === s.id ? 'page' : undefined} aria-label=${s.label} title=${s.label}
+        onClick=${() => app.setScreen(s.id)}><${Glyph} name=${s.icon} size=${17} /></button>`)}
     </nav>
 
     <div className="shell-body">

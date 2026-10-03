@@ -11,7 +11,7 @@
 'use strict';
 const { html, useState, useMemo } = require('../../h.js');
 const { Box } = require('../../components/index.js');
-const { useCommunity, downloadWarn } = require('./useCommunity.js');
+const { useCommunity, missing, downloadWarn } = require('./useCommunity.js');
 const F = require('./filters.js');
 const B = require('./boxes.js');
 
@@ -30,7 +30,8 @@ function StatisticsTab({ hero }) {
   const all = useMemo(() => F.allGroup(summary), [summary]);   // "Todas": mesma conta, todas as builds
   const [sel, setSel] = useState(null);
 
-  if (!entry) return html`<${Box} pad=${true} className="sub">Lendo os dados…<//>`;
+  // nada lido ou nada baixado (nem builds nem RTA): a aba inteira vira o bloco "sem dados"
+  if (!entry || (!summary && !official)) return missing(c, hero);
 
   const g = summary && sel != null ? groups.find((x) => x.id === sel) : null;
   const cur = g || all;

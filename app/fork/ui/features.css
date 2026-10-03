@@ -19,6 +19,8 @@
 }
 .shell-screen:hover { color: var(--text); }
 .shell-screen.on { color: var(--text); border-bottom-color: var(--accent); }
+/* tela só de ícone (Configurações): quadrada, o último item da barra, no canto direito */
+.shell-screen.shell-icon { display: inline-flex; align-items: center; padding: 0 11px; margin: 0 -6px 0 6px; }
 .shell-status {
   align-self: center; font-size: var(--fs-sm); color: var(--text-3);
   padding: 4px 10px; border: 1px solid var(--line); border-radius: var(--r-pill);
@@ -78,8 +80,6 @@
 
 /* ================= topo do herói (comum às abas) ================= */
 .ht { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.pt-empty, .pt-noacc { padding: 18px; }
-.pt-noacc { border: 1px dashed var(--line); border-radius: var(--r-lg); flex: 1 1 auto; }
 .pt-err { color: var(--bad); font-size: var(--fs-sm); padding: 6px 12px; border: 1px solid var(--bad); border-radius: var(--r-md); }
 
 /*
@@ -375,7 +375,10 @@
 .bd-foot { display: flex; justify-content: flex-end; gap: 8px; }
 .ui-btn.bd-danger { color: var(--bad); border-color: var(--bad-border); }
 .ui-btn.bd-danger:hover:not([disabled]) { border-color: var(--bad); }
-.bt-empty { font-size: var(--fs-md); }
+/* lista vazia dentro de tela com dados (nível 2 do padrão, components/EmptyState.js): área tracejada que ocupa a
+   caixa, em branco (o motivo fica no title) — nunca uma barra achatada */
+.ui-box.bt-empty { flex: 1 1 auto; min-height: 96px; background: transparent; border-style: dashed; position: relative; }
+.ui-box.bt-empty > span { position: absolute; inset: 0; }   /* a dica (title) vale na área inteira */
 .bt-scroll { max-width: 100%; max-height: 70vh; }
 .bt-head { position: sticky; top: 0; z-index: 3; }
 .bt { min-width: min-content; }
@@ -443,6 +446,12 @@
 .cm-actions { display: inline-flex; align-items: center; gap: 10px; }
 .cm-tier { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); }
 .cm-actions .ui-btn { display: inline-flex; align-items: center; gap: 6px; }
+/* baixado há mais que a validade (tela Configurações): ponto de atenção no canto do Baixar */
+.cm-actions .ui-btn.cm-old { position: relative; }
+.cm-actions .ui-btn.cm-old::after {
+  content: ''; position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--warn); border: 2px solid var(--surface-3);
+}
 
 /* 4 caixas: lado a lado no monitor grande, 2×2 no notebook */
 .cm-grid { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -536,8 +545,6 @@
 /* janela estreita: a caixa Comunidade desce (lado a lado a caixa Personagem cortava
    e a barra de prioridade encolhia até ~17px em 1280) */
 @media (max-width: 1439px) { .op { grid-template-columns: minmax(0, 1fr); } }
-.op-empty { max-width: 560px; }
-.op-empty p { margin: 0 0 6px; }
 .op-box { display: flex; flex-direction: column; min-width: 0; }
 /* cabeçalho de altura FIXA nas duas caixas: as 8 linhas de stat ficam alinhadas */
 /* topo de altura FIXA nas duas caixas (título + 1 linha): as 8 linhas de stat ficam alinhadas */
@@ -913,9 +920,6 @@ button.ip-hnote .ip-cap { display: inline-flex; align-items: center; gap: 3px; }
 .ab-none b { color: var(--text); font-weight: 600; }
 
 /* estado vazio: nenhum arquétipo */
-.ab-empty { max-width: 420px; margin: 12vh auto 0; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
-.ab-empty h2 { margin: 6px 0 0; font-size: var(--fs-xl); }
-.ab-empty p { margin: 0 0 6px; font-size: var(--fs-md); line-height: 1.45; }
 
 /* ================= tela Equipamentos (features/gear) ================= */
 .eq { height: 100%; display: flex; flex-direction: column; gap: 10px; padding: 14px 18px; min-height: 0; }
@@ -1302,3 +1306,35 @@ button.cvp-cell:focus-visible { outline-offset: -2px; }
   .cvd:not(.compact) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .cvd .cvd-who, .cvd .cvd-near { max-height: none; min-height: 0; }
 }
+
+/* ================= tela Configurações (features/settings) ================= */
+/* duas colunas de caixas (padrões | pasta e manutenção); < 1100 uma só. Cada linha: rótulo | controle, 30px */
+.cfg {
+  height: 100%; box-sizing: border-box; overflow: auto; scrollbar-gutter: stable; padding: 14px 18px;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 520px)); gap: 12px; align-content: start;
+}
+@media (max-width: 1099px) { .cfg { grid-template-columns: minmax(0, 620px); } }
+.cfg-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.cfg-rows { display: flex; flex-direction: column; padding: 4px 10px 10px; }
+.cfg-row { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; gap: 12px; min-height: 38px; }
+.cfg-row + .cfg-row { border-top: 1px solid var(--line-soft); }
+.cfg-lab { font-size: var(--fs-md); color: var(--text-2); }
+.cfg-ctl { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.cfg-ctl .ui-dd { width: 168px; }
+.cfg-ctl .ui-dd .ellipsis { flex: 1 1 auto; min-width: 0; text-align: left; }   /* texto junto do ícone, não no meio */
+/* régua: rank + número ocupam a mesma largura dos dropdowns (o rank estica) */
+.cfg-ctl .ui-icut { width: 168px; }
+.cfg-ctl .ui-icut-rank { flex: 1 1 auto; min-width: 0; display: flex; }
+.cfg-ctl .ui-icut-rank .ui-dd-wrap, .cfg-ctl .ui-icut-rank .ui-dd { width: 100%; }
+.cfg-unit { font-size: var(--fs-sm); color: var(--text-3); }
+.cfg-ver .cfg-row { min-height: 30px; }
+.cfg-ver .cfg-ctl { font-size: var(--fs-md); color: var(--text); }
+.cfg-path-row { display: flex; align-items: center; gap: 8px; min-height: 38px; color: var(--text-2); }
+.cfg-path { font-size: var(--fs-md); color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cfg-acts { display: flex; gap: 8px; padding-top: 4px; }
+/* confirmação: de / para / o que vai junto */
+.cfg-dl { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 8px 10px; margin: 0; font-size: var(--fs-md); }
+.cfg-dl dt { color: var(--text-3); }
+.cfg-dl dd { margin: 0; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cfg-dl dd.cfg-wrap { white-space: normal; overflow-wrap: anywhere; color: var(--text-2); }
+.cfg-err { color: var(--bad); }

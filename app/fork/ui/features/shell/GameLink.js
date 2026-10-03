@@ -9,7 +9,7 @@
  *
  * A escuta escreve em Documents/FribbelsOptimizerSaves/escuta/ (lib/gameSync.js); aqui só lemos:
  *   estado.json  batimento a cada 2 s (sem batimento há > 6 s = desligada)
- *   eventos.jsonl  login novo → sincroniza SOZINHO (o Eduardo quer a base sempre igual ao jogo)
+ *   eventos.jsonl  login novo → sincroniza SOZINHO (o Eduardo quer a base sempre igual ao jogo; desliga em Configurações)
  * Parar = criar o arquivo `parar` (o app não é admin; não pode matar o processo).
  * Eventos ao vivo (up, vender, extrair, equipar, tirar) → lib/gameLive.js; peça upada entra numa vaga do lote.
  */
@@ -117,6 +117,8 @@ function GameLink() {
   };
   const syncRef = useRef(doSync);
   syncRef.current = doSync;
+  const autoRef = useRef(app.autoSync);   // tela Configurações: "Sincronizar no login"
+  autoRef.current = app.autoSync;
 
   // up / vender / extrair / equipar / tirar: grava na hora; peça upada entra numa vaga do lote (ordem da grade do jogo)
   const doLive = (evs) => {
@@ -159,7 +161,7 @@ function GameLink() {
       const evs = buf.slice(0, end).toString('utf8').split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l); } catch (x) { return null; } }).filter(Boolean);
       const aviso = evs.find((x) => x.tipo === 'aviso');
       if (aviso) report([{ key: 'aviso:' + aviso.texto, kind: 'bad', text: 'Escuta: ' + aviso.texto }]);
-      if (evs.some((x) => x.tipo === 'login')) syncRef.current();
+      if (autoRef.current && evs.some((x) => x.tipo === 'login')) syncRef.current();
       const live = evs.filter((x) => LIVE.has(x.tipo));
       if (live.length) liveRef.current(live);
     };
@@ -187,7 +189,7 @@ function GameLink() {
   const bad = active.some((x) => x.kind === 'bad');
   return html`<span className="game-link">
     <span className=${'shell-status' + (st.on ? ' ok' : '')} role="status"
-      title=${st.on ? 'Login no jogo sincroniza sozinho. Nada sai do PC.'
+      title=${st.on ? (app.autoSync ? 'Login no jogo sincroniza sozinho. Nada sai do PC.' : 'Login no jogo não sincroniza sozinho. Nada sai do PC.')
         : 'A escuta lê o tráfego do jogo neste PC (nada sai daqui). Ligar pede permissão de administrador.'}>
       <span className=${'gl-dot' + (st.on ? ' on' : '')} aria-hidden="true"></span>${label}${st.login ? ` · login ${dateTime(st.login)}` : ''}
     </span>

@@ -18,6 +18,9 @@
  *  - `gemMode` (raiz): pedra de troca simulada no potencial por perfil — none | safe | reversible |
  *    permanent (itemRatings.GEM_MODES; ausente = itemRatings.DEFAULT_GEM_MODE). Os antigos `simulateGem`/
  *    `lossyGem` (dois botões) migram: simulateGem false → none; lossyGem false → safe.
+ *  - tela Configurações (raiz; ausente = o padrão do código): `communityTier`/`communityCount` (download de herói
+ *    nunca baixado, lib/rtaTiers.js), `communityDays` (dias até o "Baixar" pedir de novo), `autoSync` (false =
+ *    login no jogo NÃO sincroniza sozinho).
  *
  * Persistido em Documents/FribbelsOptimizerSaves/relevance.json.
  * Formato: { order: [nome...], heroes: { "<nome>": { favorite, equipavel, note, profile } },
@@ -28,6 +31,8 @@
 const fs = require('fs');
 const path = require('path');
 const paths = require('./forkPaths.js');
+
+const SETTINGS = ['communityTier', 'communityCount', 'communityDays', 'autoSync'];
 
 function file() { return path.join(paths.savesDir(), 'relevance.json'); }
 
@@ -42,6 +47,7 @@ function normalize(raw) {
     if (typeof raw.profileGemMode === 'string') out.profileGemMode = raw.profileGemMode;
     else if (raw.simulateGem === false) out.gemMode = 'none';
     else if (raw.lossyGem === false) out.gemMode = 'safe';
+    SETTINGS.forEach((k) => { if (raw[k] != null) out[k] = raw[k]; });
     return out;
   }
   // formato antigo: mapa nome -> {favorite, rank, note, profile}
@@ -174,7 +180,15 @@ function setInterestLimit(state, v) {
   save(next); return next;
 }
 
+// ---- configuração da raiz (tela Configurações; null = volta ao padrão do código) ----
+function setSetting(state, key, v) {
+  const next = { ...state };
+  if (v == null) delete next[key]; else next[key] = v;
+  save(next); return next;
+}
+
 module.exports = {
+  SETTINGS, setSetting,
   load, save, file,
   entry, isFavorite, isEquipavel, favoriteNames, equipavelNames,
   rankedNames, rankOf, setOrder, adoptClassicOrder, reorderBefore, reorderToVisiblePosition,

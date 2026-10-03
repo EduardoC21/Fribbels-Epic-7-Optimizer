@@ -8,8 +8,7 @@
  * otimizador) ficavam só na memória do backend e se perdiam se o app fechasse
  * antes de o clássico salvar por outro motivo.
  *
- * Pasta: a mesma do clássico — `settingDefaultPath` do settings.ini (que fica
- * sempre em Documents/FribbelsOptimizerSaves), ou essa pasta mesmo se não houver.
+ * Pasta: a mesma do clássico — `settingDefaultPath` do settings.ini (forkPaths.savesDir).
  * Grava num arquivo temporário e troca no fim: um erro no meio não deixa o
  * autosave pela metade.
  */
@@ -19,14 +18,7 @@ const path = require('path');
 const paths = require('./forkPaths.js');
 const backend = require('./backend.js');
 
-function savesFolder() {
-  const def = paths.savesDir();
-  try {
-    const s = JSON.parse(fs.readFileSync(path.join(def, 'settings.ini'), 'utf8'));
-    if (s && s.settingDefaultPath && fs.existsSync(s.settingDefaultPath)) return path.normalize(s.settingDefaultPath);
-  } catch (e) { /* sem settings.ini ou ilegível: pasta padrão */ }
-  return def;
-}
+const savesFolder = () => paths.savesDir();   // a do settings.ini do clássico (lib/forkPaths.js)
 
 function autosaveFile() { return path.join(savesFolder(), 'autosave.json'); }
 

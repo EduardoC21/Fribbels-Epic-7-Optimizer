@@ -3,12 +3,12 @@
  * (quebra em mais linhas quando a janela estreita):
  *
  *   linha 1: PEÇA (6 ícones) · SET (ícones)                     ··· N de M peças · Limpar filtros · Up em lote →
- *   linha 2: Principal · Substatus · Raridade · Nível · Aprimoramento · Dono · 🔒 🔓 ◆ ··· Para · Régua ≥ · Máx. heróis · Pedra
+ *   linha 2: Principal · Substatus · Raridade · Nível · Aprimoramento · Dono · 🔒 🔓 ◆ ··· Para · Máx. heróis · Pedra (a régua padrão é da tela Configurações)
  * (painel com borda; ferramenta fica sempre à DIREITA, mesmo quando a linha quebra; todo controle da linha 2
  * tem 30px, a altura do dropdown). Cada dropdown tem o × que limpa só ele; Dono e Para têm busca.
- * `interest` (opcional) = { value, onChange, limit, onLimit, gemMode, onGemMode, targets, codeOf }: o filtro
+ * `interest` (opcional) = { limit, onLimit, gemMode, onGemMode, targets, codeOf }: o filtro
  * "Para" (UM arquétipo ou UM herói: a lista mostra só as peças que interessam a ele, com o rank e o
- * potencial dele), o corte GLOBAL de interesse, o máximo de heróis e o modo da PEDRA simulada no potencial por
+ * potencial dele), o máximo de heróis e o modo da PEDRA simulada no potencial por
  * perfil (Sem troca · Sem perda · Com perda · Perda permanente — regra no Java, ForkItemRatings.gemMode).
  *
  * Ícone = liga/desliga (vários ao mesmo tempo = qualquer um). Os dropdowns mostram
@@ -17,7 +17,7 @@
  */
 'use strict';
 const { html } = require('../../h.js');
-const { Glyph, GameGlyph, GearIcon, SetIcon, StatIcon, Dropdown, Button, ArchetypeSymbol, Portrait, InterestCut, NumberField } = require('../../components/index.js');
+const { Glyph, GameGlyph, GearIcon, SetIcon, StatIcon, Dropdown, Button, ArchetypeSymbol, Portrait, NumberField } = require('../../components/index.js');
 const itemStats = require('../../../lib/itemStats.js');
 const itemRatings = require('../../../lib/itemRatings.js');
 const { SLOT_PT } = require('../top/GearCard.js');
@@ -101,9 +101,6 @@ function GearFilters({ filters, onChange, opts, total, shown, slotLocked, intere
           <${Dropdown} label="Para" placeholder="Para: todos" clearable=${true} search="buscar arquétipo ou herói"
             options=${targetOpts(interest.targets, interest.codeOf)}
             value=${f.target} onChange=${(v) => set({ target: v === f.target ? null : v })} /></span>
-        <span className="eq-int" title="Régua padrão">
-          <${InterestCut} lead="Régua ≥" label="Régua padrão" value=${interest.value} onChange=${interest.onChange} />
-        </span>
         <span className="eq-int" title="Máximo de heróis interessados (favoritos e equipáveis sempre aparecem)">
           <span className="eq-int-lab">Máx.</span>
           <${NumberField} className="eq-int-num sm" label="Máximo de heróis interessados" value=${interest.limit} min=${0} max=${99}
